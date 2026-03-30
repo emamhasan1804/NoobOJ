@@ -1,73 +1,118 @@
 {{define "content"}}
-<div
-    style=" margin-left: 8rem;margin-right: 8rem;display: flex;flex-direction: column;align-items: center;justify-content: center;">
+<div style="margin-left: 8rem; margin-right: 8rem;">
+    <button id="manageContestsBtn" class="active-btn">Manage Contests</button>
+    <button id="manageProblemsBtn">Manage Problems</button>
 
-    <div style="display: flex;">
-        <div style="height: 8rem; width: 70%; display: flex; align-items: center; justify-content: right;">
-            <a href="/admin/new" class="btn-p"
-                style="background-color: #139e2c; color: #ffffff; padding: 8px 16px; text-decoration: none; font-weight: 600; font-size: 18px;"><span
-                    style="font-size: x-large;">+ </span>Problem</a>
+    <div style="display: flex;flex-direction: column;align-items: center;justify-content: center;">
+
+
+
+        <div class="contests" style="display: block; width: 70%;">
+            <div style="height: 8rem; width: 100%; display: flex; align-items: center; justify-content: right;">
+                <a href="/admin/new" class="btn-p"
+                    style="background-color: #139e2c; color: #ffffff; padding: 8px 16px; text-decoration: none; font-weight: 600; font-size: 18px;"><span
+                        style="font-size: x-large;">+ </span>Contest</a>
+            </div>
+            <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 100%;">
+                <tr>
+                    <th style="width: 18%;">#</th>
+                    <th>Name</th>
+                    <th colspan="2"> </th>
+                </tr>
+                {{if .Problems}}
+                {{range .Problems}}
+                <tr>
+                    <td style="padding: 7px;"><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
+                    <td style="padding: 7px;"><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a>
+                    </td>
+                    <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;"><a
+                            href="/edit/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/edit.webp"></a>
+                    </td>
+                    <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;"><a
+                            href="/delete/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/delete.png"></a>
+                    </td>
+                </tr>
+                {{end}}
+                {{else}}
+                <tr>
+                    <td colspan="4" style="text-align: center;">No data found.</td>
+                </tr>
+                {{end}}
+            </table>
         </div>
 
-        <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 70%;">
-            <tr>
-                <th style="width: 18%;">#</th>
-                <th>Name</th>
-                <th colspan="2"> </th>
-            </tr>
-            {{if .Problems}}
-            {{range .Problems}}
-            <tr>
-                <td style="padding: 7px;"><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
-                <td style="padding: 7px;"><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a></td>
-                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
-                    <a href="/edit/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/edit.webp"></a>
-                </td>
-                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
-                    <a href="/delete/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/delete.png"></a>
-                </td>
-            </tr>
-            {{end}}
-            {{else}}
-            <tr>
-                <td colspan="4" style="text-align: center;">No data found.</td>
-            </tr>
-            {{end}}
-
-        </table>
-        <div style="height: 8rem; width: 70%; display: flex; align-items: center; justify-content: right;">
-            <a href="/admin/new" class="btn-p"
-                style="background-color: #139e2c; color: #ffffff; padding: 8px 16px; text-decoration: none; font-weight: 600; font-size: 18px;"><span
-                    style="font-size: x-large;">+ </span>Problem</a>
+        <div class="problems" style="display: none; width: 70%;">
+            <div style="height: 8rem; width: 100%; display: flex; align-items: center; justify-content: right;">
+                <a href="/admin/new" class="btn-p"
+                    style="background-color: #139e2c; color: #ffffff; padding: 8px 16px; text-decoration: none; font-weight: 600; font-size: 18px;"><span
+                        style="font-size: x-large;">+ </span>Problem</a>
+            </div>
+            <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 100%;">
+                <tr>
+                    <th style="width: 18%;">#</th>
+                    <th>Name</th>
+                    <th colspan="2"> </th>
+                </tr>
+                {{if .Problems}}
+                {{range .Problems}}
+                <tr>
+                    <td style="padding: 7px;"><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
+                    <td style="padding: 7px;"><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a>
+                    </td>
+                    <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;"><a
+                            href="/edit/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/edit.webp"></a>
+                    </td>
+                    <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;"><a
+                            href="/delete/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/delete.png"></a>
+                    </td>
+                </tr>
+                {{end}}
+                {{else}}
+                <tr>
+                    <td colspan="4" style="text-align: center;">No data found.</td>
+                </tr>
+                {{end}}
+            </table>
         </div>
 
-        <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 70%;">
-            <tr>
-                <th style="width: 18%;">#</th>
-                <th>Name</th>
-                <th colspan="2"> </th>
-            </tr>
-            {{if .Problems}}
-            {{range .Problems}}
-            <tr>
-                <td style="padding: 7px;"><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
-                <td style="padding: 7px;"><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a></td>
-                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
-                    <a href="/edit/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/edit.webp"></a>
-                </td>
-                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
-                    <a href="/delete/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/delete.png"></a>
-                </td>
-            </tr>
-            {{end}}
-            {{else}}
-            <tr>
-                <td colspan="4" style="text-align: center;">No data found.</td>
-            </tr>
-            {{end}}
-
-        </table>
     </div>
-
 </div>
+
+
+<style>
+    button {
+        background: none;
+        border: none;
+        font-size: 18px;
+        padding: 8px 16px;
+        cursor: pointer;
+        outline: none;
+    }
+
+    .active-btn {
+        border-bottom: 3px solid #139e2c;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+    const contestsDiv = document.querySelector('.contests');
+    const problemsDiv = document.querySelector('.problems');
+    const manageContestsBtn = document.getElementById('manageContestsBtn');
+    const manageProblemsBtn = document.getElementById('manageProblemsBtn');
+
+    manageContestsBtn.addEventListener('click', () => {
+        contestsDiv.style.display = 'block';
+        problemsDiv.style.display = 'none';
+        manageContestsBtn.classList.add('active-btn');
+        manageProblemsBtn.classList.remove('active-btn');
+    });
+
+    manageProblemsBtn.addEventListener('click', () => {
+        contestsDiv.style.display = 'none';
+        problemsDiv.style.display = 'block';
+        manageProblemsBtn.classList.add('active-btn');
+        manageContestsBtn.classList.remove('active-btn');
+    });
+</script>
 {{end}}
