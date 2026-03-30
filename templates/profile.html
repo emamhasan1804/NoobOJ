@@ -1,0 +1,134 @@
+{{define "content"}}
+<div style="margin-left: 15rem;margin-right: 15rem; margin-top: 2rem;">
+    <div class="profile-card"
+        style="border: 1px solid rgb(0, 0, 0); height: 10rem; display: flex; align-items: center; justify-content: space-between; padding: 1rem;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            
+            <div style="height: 6rem; width: 6rem; border: 2px solid rgb(68, 44, 228); margin-left: 2rem;"><img style="height: 100%; width: 100%; " src="/static/profile.png"></div>
+            <div class="name">
+                <h1 style="margin-bottom: 0px;">{{.Name}}</h1>
+                <p style="margin-top: 0px;margin-bottom: 0px; opacity: 80%;">{{.Username}} | Joined {{.Time}}</p>
+                {{if eq .Rank 0}}
+                <h6
+                    style="margin-top: 2px; border: 1px solid black; padding: 2px;color: white; background-color: black; width:fit-content ;">
+                    STARTER</h6>
+                {{else if eq .Rank 1}}
+                <h6
+                    style="margin-top: 2px; border: 1px solid rgb(0, 144, 0); padding: 2px;color: white; background-color: rgb(0, 144, 0); width:fit-content ;">
+                    INTERMEDIATE</h6>
+                {{else if eq .Rank 2}}
+                <h6
+                    style="margin-top: 2px; border: 1px solid rgb(68, 44, 228); padding: 2px;color: white; background-color: rgb(68, 44, 228); width:fit-content ;">
+                    VETERAN</h6>
+                {{else}}
+                <h6
+                    style="margin-top: 2px; border: 1px solid rgb(228, 44, 44); padding: 2px;color: white; background-color: rgb(228, 44, 44); width:fit-content ;">
+                    ADMIN</h6>
+                {{end}}
+            </div>
+        </div>
+        <div style="margin-right: 2rem;">
+            <a href="/submissions/user?username={{.Username}}"> <button
+                    style="font-size: 1rem; padding-top: 5px; width: 100%; padding-bottom: 5px;padding-left: 10px;padding-right: 10px;"><b>Submissions</b></button></a>
+        </div>
+    </div>
+
+    <div class="badges"
+        style="display: flex; justify-content: space-between; gap: 25px;margin-top: 40px; height: 6rem; width: 100%; font-size: small;">
+        <div class="badge"
+            style="border: 1px solid black; width: 100%; align-items: center; justify-content: center;display: flex; flex-direction: column;">
+            <p style="margin-top: 0px;margin-bottom: 0px; opacity: 80%;">PROBLEMS SOLVED</p>
+            <h1 style="margin: 0px;">{{.Solved}}</h1>
+        </div>
+        <div class="badge"
+            style="border: 1px solid black; width: 100%; align-items: center; justify-content: center;display: flex; flex-direction: column;">
+            <p style="margin-top: 0px;margin-bottom: 0px; opacity: 80%;">GLOBAL RANK</p>
+            <h1 style="margin: 0px;">{{if .GlobalRank}}#{{.GlobalRank}}{{else}}Ø{{end}}</h1>
+        </div>
+        <div class="badge"
+            style="border: 1px solid black; width: 100%; align-items: center; justify-content: center;display: flex; flex-direction: column;">
+            <p style="margin-top: 0px;margin-bottom: 0px; opacity: 80%;">ACCURACY</p>
+            <h1 style="margin: 0px;">{{.Accuracy}}%</h1>
+        </div>
+        <style>
+            
+            .today {
+                border: 3px solid rgb(68, 44, 228) !important;
+            }
+        </style>
+        <div class="{{if .Today}}today{{else}}no{{end}}"
+            style="border: 1px solid black; width: 100%; align-items: center; justify-content: center;display: flex; flex-direction: column;">
+            <p style="margin-top: 0px;margin-bottom: 0px; opacity: 80%;">CURRENT STREAK</p>
+            <h1 style="margin: 0px; color: rgb(68, 44, 228);">{{.Streak}}
+                DAYS</h1>
+        </div>
+    </div>
+
+    <div style="margin-top: 3rem; display: flex; justify-content: space-between;">
+        <div style="width: 50%;">
+            <h3 style="margin-bottom: 3px; margin-top: 0px;">Recent submissions</h3>
+            <table border="1" style="border-collapse: collapse; width: 100%;">
+
+                <tr>
+                    <th style="text-align: left; padding: 4px;">problem</th>
+                    <th style="padding: 4px; text-align: left;">language</th>
+                    <th style="padding: 4px; text-align: left;">verdict</th>
+                </tr>
+                {{range .Recents}}
+                <tr style="text-align: left;">
+                    <td style="padding: 4px;"><a href="/problem?id={{.ID}}">{{.Problem}}</a></td>
+                    <td style="padding: 4px;">GNU G++14</td>
+                    <style>
+                        .accepted {
+                            color: rgb(5, 146, 5);
+                            padding: 4px;
+                        }
+
+                        .wa {
+                            color: rgb(218, 15, 15);
+                            padding: 4px;
+                        }
+                    </style>
+                    <td class="{{if eq .Verdict .Accepted}}accepted{{else}}wa{{end}}"><b>{{.Verdict}}</b></td>
+                </tr>
+                {{end}}
+            </table>
+        </div>
+        <div style="width: 40%;">
+            <h3 style="margin-bottom: 3px; margin-top: 0px;">Unsolved problems</h3>
+            <div style=" width: 100%;">
+                <table class="tags" style="border-collapse: collapse; width: 100%; resize: none; margin-bottom: 2rem;">
+                    {{if .Unsolved}}
+                    <tr>
+                        {{range .Unsolved}}
+                        <td style="border: 1px solid black; padding: 20px; padding-bottom: 30px;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                
+                                    
+                                        <a href="/problem?id={{.}}">{{.}} </a>
+                                    
+                                
+                            </div>
+                        </td>
+                        
+                        
+                    </tr>
+                    {{end}}
+                    {{else}}
+                        <tr>
+                            <td style="border: 1px solid black; padding: 20px;">
+                                <div style="text-align: center;">No unsolved submission found</div>
+                            </td>
+                        </tr>
+                    {{end}}
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+{{end}}

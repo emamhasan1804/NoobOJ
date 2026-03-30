@@ -1,0 +1,81 @@
+{{define "content"}}
+<style>
+    .solved td {
+        background-color: RGB(217, 236, 204)
+    }
+
+    .attempted td {
+        background-color: RGB(250, 228, 227)
+    }
+
+    .table-style {
+        margin-left: 8rem;
+        margin-right: 8rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+        word-wrap: break-word;
+        /* Prevents long text from breaking the layout */
+    }
+
+    table td,
+    table th {
+        padding: 20px;
+        font-size: large;
+        text-align: left;
+    }
+
+    table td:nth-child(1),
+    table th:nth-child(1),
+    table td:nth-child(3),
+    table th:nth-child(3),
+    table td:nth-child(4),
+    table th:nth-child(4) {
+        width: 6rem;
+    }
+
+    h1 {
+        margin-top: 2rem;
+        color: #111;
+    }
+</style>
+<div class="table-style">
+    <h1>Problemset</h1>
+    <br>
+    <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 100%;">
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Rating</th>
+            <th>Solved by</th>
+        </tr>
+        {{range .Problems}}
+        <tr class="{{if eq .Tried 2}}solved{{else if eq .Tried 1}}attempted{{else}}unattempted{{end}}">
+            <td><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
+            <td><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a>
+                <sub style="font-size: small; color: #666;">
+                    {{range $index, $tag := .Tags -}}
+                    {{if $index}}, {{end}} {{$tag}}
+                    {{- end}}
+                </sub>
+
+            </td>
+            <td>*{{.Rating}}</td>
+            <td>{{.Solved}}</td>
+        </tr>
+        {{else}}
+        <tr>
+            <td colspan="4" style="text-align: center;">No data found.</td>
+        </tr>
+        {{end}}
+
+    </table>
+</div>
+
+{{end}}

@@ -1,0 +1,38 @@
+{{define "content"}}
+
+
+<div style="margin-left: 8rem; margin-right: 8rem;color: rgb(74, 74, 74);">
+    <h3>Fill in the form to Register into NoobOJ.</h3> <br>
+    <table border="1" style=" border-collapse: collapse; width: 35%; margin-left: 23rem;">
+        <tr>
+            <th
+                style="text-align: left;padding-left: 10px; padding-top: 5px; padding-bottom: 5px; color: rgb(68, 44, 228);">
+                Register into NoobOJ
+            </th>
+        </tr>
+        <tr>
+            <td style="padding-left: 4rem;padding-right: 3rem; padding-top: 2rem; padding-bottom: 1rem;">
+                <form action="/register" method="POST">
+                    <label style="margin-right: 10px;display: inline-block;width: 80px;" for="name">Name</label>
+                    <input style="width: 55%;" type="text" name="name" id="name" required><br><br>
+                    <label style="margin-right: 10px;display: inline-block;width: 80px;" for="username">Username</label>
+                    <input style="width: 55%;" type="text" name="username" id="username" required><br><br>
+                    <label style="margin-right: 10px;display: inline-block;width: 80px;" for="email">Email</label>
+                    <input style="width: 55%;" type="email" name="email" id="email" required><br><br>
+                    <label style="margin-right: 10px;display: inline-block;width: 80px;" for="password">Password</label>
+                    <input style="width: 55%;" type="password" name="password" id="password" required><br>
+                    <br><label style="margin-right: 10px;display: inline-block;width: 80px;" for="confirm_password">Confirm Password</label>
+                    <input style="width: 55%;" type="password" name="confirm_password" id="confirm_password" required><br>
+                    <br>
+                    <input
+                        style="margin-left: 6rem;font-size: 1rem; padding-top: 2px; padding-bottom: 2px;padding-left: 10px;padding-right: 10px;"
+                        type="submit" value="Register">
+                </form>
+                <br>
+                <a style="margin-left: 9rem; font-size: x-small;" href="/login">Already have an account? Login</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+{{end}}

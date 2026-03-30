@@ -1,0 +1,70 @@
+{{define "content"}}
+<style>
+    .table-style {
+        margin-left: 8rem;
+        margin-right: 8rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+        word-wrap: break-word;
+        /* Prevents long text from breaking the layout */
+    }
+
+    table td,
+    table th {
+        padding: 5px;
+        font-size: large;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 2rem;
+        color: #111;
+    }
+</style>
+<div class="table-style">
+    <br><br>
+    <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 100%;">
+        <tr>
+            <th colspan="7" style="text-align: left;">Current or upcoming contests</th>
+        </tr>
+        <tr>
+            <th>Title</th>
+            <th>Authors</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Length</th>
+            <th></th>
+            <th></th>
+        </tr>
+        {{range .Contests}}
+        <tr>
+            <td>{{.Title}}</td>
+            <td><a href="/profile?username=admin">admin</a></td>
+            <td>{{.StartTime}}</td>
+            <td>{{.EndTime}}</td>
+            <td>02:00</td>
+            <td>starts in 14:20:13</td>
+            <td>
+                <form method="post" action="/register/contest?id={{.ID}}" style="display:inline;">
+                    <input type="submit" value="Register"
+                        style=" padding:5px; font-weight:600; font-size:15px; color:white; background-color:red; border:none; cursor:pointer;">
+                </form>
+            </td>
+        </tr>
+        {{else}}
+        <tr>
+            <td colspan="7" style="text-align: center;">No data found.</td>
+        </tr>
+        {{end}}
+
+    </table>
+</div>
+
+{{end}}

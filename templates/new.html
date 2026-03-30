@@ -1,0 +1,203 @@
+{{define "content"}}
+<style>
+    .container {
+        max-width: 800px;
+        margin: auto;
+        background: white;
+        padding: 30px;
+        border: 1px solid rgb(74, 74, 74);
+    }
+
+    h1 {
+        margin-top: 0;
+    }
+
+    label {
+        font-weight: 600;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #fafafa;
+    }
+
+    legend {
+        font-weight: bold;
+        padding: 0 5px;
+    }
+
+    button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .add-btn {
+        background: #2d8cff;
+        color: white;
+    }
+
+    .remove-btn {
+        background: #ff4d4f;
+        color: white;
+        margin-top: 8px;
+    }
+
+    .submit-btn {
+        background: #28a745;
+        color: white;
+        font-weight: bold;
+        padding: 10px 18px;
+        font-size: 15px;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 25px 0;
+    }
+
+    h1 {
+        margin-top: 2rem;
+        color: #111;
+    }
+</style>
+
+
+<div
+    style=" margin-left: 8rem;margin-right: 8rem;display: flex;flex-direction: column;align-items: center;justify-content: center;">
+
+    <label for="title">
+        <h1>Create New Problem</h1>
+    </label>
+    <div class="container">
+
+        <form action="/admin/new" method="POST">
+            <div class="section">
+                <label for="title">Problem Title</label>
+                <input type="text" name="title" id="title" placeholder="Enter problem title" required> <br><br>
+                <label for="statement">Problem Statement</label>
+                    <textarea name="statement" id="statement" rows="6" placeholder="Describe the problem"
+                        required></textarea> <br><br>
+                    <label for="input_desc">Input</label>
+                    <textarea name="input_desc" id="input_desc" rows="3" placeholder="Describe the input"
+                        required></textarea> <br><br>
+                    <label for="output_desc">Output</label>
+                    <textarea name="output_desc" id="output_desc" rows="3" placeholder="Describe the output"
+                        required></textarea> <br><br>
+                    <label for="constraints">Constraints</label>
+                    <textarea name="constraints" id="constraints" rows="3" placeholder="e.g. 1 ≤ N ≤ 10^5"></textarea> <br><br>
+                    <label for="tags">Tags</label>
+                    <input type="text" name="tags" id="tags" rows="3" placeholder="Bruteforce"></textarea> <br><br>
+                    <label for="rating">Rating</label>
+                    <input type="text" name="rating" id="rating" rows="3" placeholder="800" style="width: 10%; margin-left: 5px;"></textarea>
+            </div>
+            <br>
+            <hr>
+            <h3>Test Cases</h3>
+
+            <div id="test-case-container">
+
+                <fieldset>
+
+                    <legend>Test Case 1</legend>
+
+                    <label for="test_input[]">Input</label>
+                    <textarea name="test_input[]" id="test_input[]" rows="3"></textarea>
+
+                    <label for="test_output[]">Output</label>
+                    <textarea name="test_output[]" id="test_output[]" rows="3"></textarea>
+
+                    <label>Type</label>
+                    <select name="test_type[]">
+                        <option value="hidden">Hidden</option>
+                        <option value="sample">Sample (Visible)</option>
+                    </select>
+                    <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
+
+                </fieldset>
+
+            </div>
+
+            <button type="button" class="add-btn" onclick="addTestCase()">+ Add Test Case</button>
+
+            <hr>
+
+            <button type="submit" class="submit-btn">Save Problem</button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+
+    function updateNumbers() {
+        const fieldsets = document.querySelectorAll("#test-case-container fieldset")
+
+        fieldsets.forEach((f, i) => {
+            f.querySelector("legend").textContent = "Test Case " + (i + 1)
+        })
+    }
+
+    function addTestCase() {
+
+        const container = document.getElementById("test-case-container")
+
+        const field = document.createElement("fieldset")
+
+        field.innerHTML = `
+<legend></legend>
+
+<label>Input</label>
+<textarea name="test_input[]" rows="3"></textarea>
+
+<label>Output</label>
+<textarea name="test_output[]" rows="3"></textarea>
+
+<label>Type</label>
+<select name="test_type[]">
+<option value="hidden">Hidden</option>
+<option value="sample">Sample (Visible)</option>
+</select>
+
+<button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
+`
+
+        container.appendChild(field)
+
+        updateNumbers()
+    }
+
+    function removeTestCase(btn) {
+        btn.parentElement.remove()
+        updateNumbers()
+    }
+
+    updateNumbers()
+
+</script>
+
+{{end}}

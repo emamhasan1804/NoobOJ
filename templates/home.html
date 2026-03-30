@@ -1,0 +1,33 @@
+{{define "content"}}
+<style>
+    .bottom {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+    }
+</style>
+<section
+    style="display: flex; justify-content: center; align-items: center; padding: 50px 20px; min-height: 50vh;font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+
+    <div style="max-width: 800px; text-align: center;">
+
+        <h1
+            style="font-size: 72px; font-weight: 800; color: #111; margin-bottom: 24px; letter-spacing: -2px; line-height: 1.1;">
+            Level Up Your Coding Skills.</h1>
+        <p
+            style="font-size: 20px;color: #666;line-height: 1.6;margin-bottom: 40px;max-width: 600px;margin-left: auto;margin-right: auto;">
+            A beginner friendly platform to solve challenges with c++, and climb the
+            leaderboard.</p>
+
+        <div class="bottom">
+            <a href="/problemset" class="btn-p"
+                style="background-color: #000000; color: #ffffff; padding: 16px 32px; text-decoration: none; font-weight: 600; font-size: 18px;">Start
+                Solving</a>
+            <a href="/leaderboard" class="btn-s"
+                style="background-color: #ffffff;color: #000000;padding: 16px 32px;text-decoration: none;font-weight: 600;font-size: 18px;border: 1px solid #000000;">Leaderboard</a>
+        </div>
+    </div>
+</section>
+
+
+{{end}}

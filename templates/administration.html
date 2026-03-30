@@ -1,0 +1,73 @@
+{{define "content"}}
+<div
+    style=" margin-left: 8rem;margin-right: 8rem;display: flex;flex-direction: column;align-items: center;justify-content: center;">
+
+    <div style="display: flex;">
+        <div style="height: 8rem; width: 70%; display: flex; align-items: center; justify-content: right;">
+            <a href="/admin/new" class="btn-p"
+                style="background-color: #139e2c; color: #ffffff; padding: 8px 16px; text-decoration: none; font-weight: 600; font-size: 18px;"><span
+                    style="font-size: x-large;">+ </span>Problem</a>
+        </div>
+
+        <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 70%;">
+            <tr>
+                <th style="width: 18%;">#</th>
+                <th>Name</th>
+                <th colspan="2"> </th>
+            </tr>
+            {{if .Problems}}
+            {{range .Problems}}
+            <tr>
+                <td style="padding: 7px;"><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
+                <td style="padding: 7px;"><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a></td>
+                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
+                    <a href="/edit/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/edit.webp"></a>
+                </td>
+                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
+                    <a href="/delete/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/delete.png"></a>
+                </td>
+            </tr>
+            {{end}}
+            {{else}}
+            <tr>
+                <td colspan="4" style="text-align: center;">No data found.</td>
+            </tr>
+            {{end}}
+
+        </table>
+        <div style="height: 8rem; width: 70%; display: flex; align-items: center; justify-content: right;">
+            <a href="/admin/new" class="btn-p"
+                style="background-color: #139e2c; color: #ffffff; padding: 8px 16px; text-decoration: none; font-weight: 600; font-size: 18px;"><span
+                    style="font-size: x-large;">+ </span>Problem</a>
+        </div>
+
+        <table border="1" style="border-collapse: collapse; color: rgb(74, 74, 74); width: 70%;">
+            <tr>
+                <th style="width: 18%;">#</th>
+                <th>Name</th>
+                <th colspan="2"> </th>
+            </tr>
+            {{if .Problems}}
+            {{range .Problems}}
+            <tr>
+                <td style="padding: 7px;"><a href="/problem?id={{.ID}}">{{.ID}}</a></td>
+                <td style="padding: 7px;"><a style="padding-right: 3px;" href="/problem?id={{.ID}}">{{.Title}}</a></td>
+                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
+                    <a href="/edit/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/edit.webp"></a>
+                </td>
+                <td style="width: 8%; text-align: center; vertical-align: middle; padding-top: 5px;">
+                    <a href="/delete/problem?id={{.ID}}"><img style="height: 1.3rem;" src="static/delete.png"></a>
+                </td>
+            </tr>
+            {{end}}
+            {{else}}
+            <tr>
+                <td colspan="4" style="text-align: center;">No data found.</td>
+            </tr>
+            {{end}}
+
+        </table>
+    </div>
+
+</div>
+{{end}}
