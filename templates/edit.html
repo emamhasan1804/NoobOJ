@@ -2,6 +2,7 @@
 <style>
     .container {
         max-width: 800px;
+        width: 100%;
         margin: auto;
         background: white;
         padding: 30px;
@@ -93,7 +94,7 @@
     </label>
     <div class="container">
 
-        <form action="/admin/new" method="POST">
+        <form action="/edit/problem?id={{.ID}}" method="POST">
             <div class="section">
                 <label for="title">Problem Title</label>
                 <input type="text" value="{{.Ptitle}}" name="title" id="title" placeholder="Enter problem title"
@@ -102,7 +103,7 @@
                 <textarea name="statement" id="statement" rows="6" placeholder="Describe the problem"
                     required>{{.Statement}}</textarea> <br><br>
                 <label for="input_desc">Input</label>
-                <textarea name="input_desc" id="input_desc" rows="3" placeholder="Describe the input"
+                <textarea  name="input_desc" id="input_desc" rows="3" placeholder="Describe the input"
                     required>{{.Input}}</textarea> <br><br>
                 <label for="output_desc">Output</label>
                 <textarea name="output_desc" id="output_desc" rows="3" placeholder="Describe the output"
@@ -134,10 +135,17 @@
                     <textarea name="test_output[]" id="test_output[]" rows="3">{{ .Output}}</textarea>
 
                     <label>Type</label>
+                    {{if eq .Type $.Hidden}}
                     <select name="test_type[]">
                         <option value="hidden">Hidden</option>
                         <option value="sample">Sample (Visible)</option>
                     </select>
+                    {{else}}
+                    <select name="test_type[]">
+                        <option value="sample">Sample (Visible)</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                    {{end}}
                     <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
 
                 </fieldset>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabbed Navigation UI</title>
+    <style>
+        /* General Reset */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        /* 1. Navigation Bar Styling */
+        .tabs-nav {
+            display: flex;
+            background-color: #f4f6f8; /* Light grey background from screenshot */
+            border: 1px solid #d1d5db;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            padding-left: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #738f93; /* Muted grey for inactive */
+            transition: all 0.2s ease;
+            outline: none;
+            position: relative;
+            border-left: 1px solid transparent;
+            border-right: 1px solid transparent;
+        }
+
+        /* 2. Active Tab Styling */
+        .tab-btn.active {
+            background-color: #ffffff;
+            color: #2c3e50;
+            /* Creates the "lifted" effect */
+            border-left: 1px solid #d1d5db;
+            border-right: 1px solid #d1d5db;
+            margin-bottom: -1px; /* Overlaps the bottom border */
+            z-index: 2;
+        }
+
+        /* The blue/dark indicator line */
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #34495e;
+        }
+
+        /* 3. Content Area Styling */
+        .content-container {
+            border: 1px solid #d1d5db;
+            padding: 30px;
+            background: #fff;
+            min-height: 200px;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .tab-content {
+            display: none; /* Hide all by default */
+        }
+
+        .tab-content.active {
+            display: block; /* Show only the active one */
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'details')">Details</button>
+        <button class="tab-btn" onclick="openTab(event, 'moderators')">Moderators</button>
+        <button class="tab-btn" onclick="openTab(event, 'test-cases')">Test Cases</button>
+        <button class="tab-btn" onclick="openTab(event, 'languages')">Languages</button>
+        <button class="tab-btn" onclick="openTab(event, 'editorial')">Editorial</button>
+    </div>
+
+    <div class="content-container">
+        <div id="details" class="tab-content active">
+            <h2>Problem Details</h2>
+            <p>This section contains the problem description, constraints, and examples.</p>
+        </div>
+
+        <div id="moderators" class="tab-content">
+            <h2>Moderators</h2>
+            <p>Manage the permissions of users who can edit this challenge.</p>
+        </div>
+
+        <div id="test-cases" class="tab-content">
+            <h2>Test Cases</h2>
+            <p>Upload input/output files to validate user submissions.</p>
+        </div>
+
+        <div id="languages" class="tab-content">
+            <h2>Languages</h2>
+            <p>Enable or disable specific programming languages for this task.</p>
+        </div>
+
+        <div id="editorial" class="tab-content">
+            <h2>Editorial</h2>
+            <p>Provide a detailed explanation and solution for the participants.</p>
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
+
+            // Get all elements with class="tab-content" and hide them
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            // Get all elements with class="tab-btn" and remove the class "active"
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+
+</body>
+</html>

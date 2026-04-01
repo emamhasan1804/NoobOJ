@@ -1,0 +1,1 @@
+{"name":"Local: check","url":"/Users/emamhasan/Documents/NoobOJ/check.cpp","tests":[{"id":1774964668856,"input":"4\nword\nlocalization\ninternationalization\npneumonoultramicroscopicsilicovolcanoconiosis","output":"word\nl10n\ni18n\np43s"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"/Users/emamhasan/Documents/NoobOJ/check.cpp","group":"local","local":true}
