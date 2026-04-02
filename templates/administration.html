@@ -81,8 +81,6 @@
 
     <div style="display: flex;flex-direction: column;align-items: center;justify-content: center;">
 
-
-
         <div class="contests" style="display: block; width: 70%;">
             <div style="height: 8rem; width: 100%; display: flex; align-items: center; justify-content: right;">
                 <button class="create-btn" onclick="window.location.href='/admin/new'">
@@ -137,10 +135,12 @@
                         border: none;
                         transition: all 0.2s ease;
                     }
+
                     .create-btn .plus {
                         font-size: 18px;
                         font-weight: 600;
                     }
+
                     .create-btn:hover {
                         background: #0066d6;
                     }
@@ -157,7 +157,7 @@
                 <tr>
                     <th style="width: 18%;">#</th>
                     <th>Name</th>
-                    <th colspan="2"> </th>
+                    <th colspan="3"> </th>
                 </tr>
                 {{if .Problems}}
                 {{range .Problems}}
@@ -202,11 +202,36 @@
                             }
                         </script>
                     </td>
+                    {{if .Visibility}}
+                    <td
+                        style="width: 7rem; padding: 0px; margin: 0px; background-color: rgb(228, 44, 44);color: white; text-align: center; vertical-align: middle; padding-top: 5px;">
+                        <form action="/admin/toggle" method="POST">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <button type="submit" style="color: white; font-weight: bold; font-size: small;">
+                                Unpublish
+                            </button>
+                        </form>
+
+                    </td>
+                    {{else}}
+                    <td
+                        style="width: 7rem; padding: 0px; margin: 0px; background-color: green;color: white; text-align: center; vertical-align: middle; padding-top: 5px;">
+                        <form method="POST" action="/admin/toggle">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <button type="submit" style="color: white; font-weight: bold; font-size: small;">
+                                Publish
+                            </button>
+                        </form>
+
+        
+
+                    </td>
+                    {{end}}
                 </tr>
                 {{end}}
                 {{else}}
                 <tr>
-                    <td colspan="4" style="text-align: center;">No data found.</td>
+                    <td colspan="5" style="text-align: center;">No data found.</td>
                 </tr>
                 {{end}}
             </table>
@@ -238,18 +263,33 @@
     const manageContestsBtn = document.getElementById('manageContestsBtn');
     const manageProblemsBtn = document.getElementById('manageProblemsBtn');
 
+    function showTab(tab) {
+        if(tab === 'problem') {
+            contestsDiv.style.display = 'none';
+            problemsDiv.style.display = 'block';
+            manageProblemsBtn.classList.add('active-btn');
+            manageContestsBtn.classList.remove('active-btn');
+        } else {
+            contestsDiv.style.display = 'block';
+            problemsDiv.style.display = 'none';
+            manageContestsBtn.classList.add('active-btn');
+            manageProblemsBtn.classList.remove('active-btn');
+        }
+    }
+
+    // Check query parameter on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab'); // ?tab=problem or ?tab=contest
+    showTab(tab || 'contest'); // default to contest
+
     manageContestsBtn.addEventListener('click', () => {
-        contestsDiv.style.display = 'block';
-        problemsDiv.style.display = 'none';
-        manageContestsBtn.classList.add('active-btn');
-        manageProblemsBtn.classList.remove('active-btn');
+        showTab('contest');
+        history.replaceState(null, '', '/administration?tab=contest');
     });
 
     manageProblemsBtn.addEventListener('click', () => {
-        contestsDiv.style.display = 'none';
-        problemsDiv.style.display = 'block';
-        manageProblemsBtn.classList.add('active-btn');
-        manageContestsBtn.classList.remove('active-btn');
+        showTab('problem');
+        history.replaceState(null, '', '/administration?tab=problem');
     });
 </script>
 {{end}}

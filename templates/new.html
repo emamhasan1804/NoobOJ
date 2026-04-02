@@ -99,17 +99,6 @@
         font-weight: 600;
     }
 
-    input[type="text"],
-    textarea,
-    select {
-        width: 100%;
-        padding: 10px;
-        margin-top: 6px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
 
     textarea {
         resize: vertical;
@@ -175,21 +164,21 @@
         <button style="margin-left: 1rem;" class="tab-btn active" onclick="openTab(event, 'details')">Details</button>
         <button class="tab-btn" onclick="openTab(event, 'test-case')">Test Cases</button>
         <button class="tab-btn" onclick="openTab(event, 'languages')">Languages</button>
-        <button class="tab-btn" onclick="openTab(event, 'editorial')">Editorial</button>
+        <button class="tab-btn" onclick="openTab(event, 'editoriaL')">Editorial</button>
     </div>
+
     <div class="content-container" style="width: 100%;">
-        <form action="/admin/new" method="POST">
+        <form style="margin: 20px;" action="/admin/new" method="POST">
             <div id="details" class="tab-content active section">
-                <h2>Problem Details</h2>
                 <label for="title">Problem Title</label>
                 <input type="text" name="title" id="title" placeholder="Enter problem title" required> <br><br>
                 <label for="statement">Problem Statement</label>
                 <textarea name="statement" id="statement" rows="6" placeholder="Describe the problem"
                     required></textarea> <br><br>
-                <label for="input_desc">Input</label>
+                <label for="input_desc">Input Description</label>
                 <textarea name="input_desc" id="input_desc" rows="3" placeholder="Describe the input"
                     required></textarea> <br><br>
-                <label for="output_desc">Output</label>
+                <label for="output_desc">Output Description</label>
                 <textarea name="output_desc" id="output_desc" rows="3" placeholder="Describe the output"
                     required></textarea> <br><br>
                 <label for="constraints">Constraints</label>
@@ -205,47 +194,58 @@
 
             <div id="test-case" class="tab-content">
                 <div id="test-case-container">
-                    <h2>Test Cases</h2>
-                <fieldset>
+                    <fieldset>
 
-                    <legend>Test Case 1</legend>
+                        <legend>Test Case 1</legend>
 
-                    <label for="test_input[]">Input</label>
-                    <textarea name="test_input[]" id="test_input[]" rows="3"></textarea>
+                        <label for="test_input[]">Input</label>
+                        <textarea name="test_input[]" id="test_input[]" rows="3"></textarea>
 
-                    <label for="test_output[]">Output</label>
-                    <textarea name="test_output[]" id="test_output[]" rows="3"></textarea>
+                        <label for="test_output[]">Output</label>
+                        <textarea name="test_output[]" id="test_output[]" rows="3"></textarea>
 
-                    <label>Type</label>
-                    <select name="test_type[]">
-                        <option value="hidden">Hidden</option>
-                        <option value="sample">Sample (Visible)</option>
-                    </select>
-                    <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
-                    
+                        <label>Type</label>
+                        <select name="test_type[]">
+                            <option value="hidden">Hidden</option>
+                            <option value="sample">Sample (Visible)</option>
+                        </select>
+                        <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
 
-                </fieldset>
+
+                    </fieldset>
                 </div>
                 <button type="button" class="add-btn" onclick="addTestCase()">+ Add Test Case</button>
             </div>
 
             <div id="languages" class="tab-content">
-                <h2>Languages</h2>
-                <p>Enable or disable specific programming languages for this task.</p>
+                <label>Language </label><span style="margin-left: 6rem;">c++14 </span> <br><br>
+                <label for="time">Time limit (seconds)</label>
+                <input style="margin-left: 1rem;" type="number" name="time" id="time" min="1" max="5" value="1"
+                    required> <br><br>
+                <label for="memory">Memory limit (MB)</label>
+                <input style="margin-left: 2rem;" type="number" name="memory" id="memory" min="256" max="512"
+                    value="512" required>
             </div>
 
-            <div id="editorial" class="tab-content">
-                <h2>Editorial</h2>
-                <p>Provide a detailed explanation and solution for the participants.</p>
+            <div id="editoriaL" class="tab-content">
+                <label for="editorial">Editorial</label>
+                <textarea name="editorial" id="editorial" rows="6"
+                    placeholder="Describe the solution"></textarea><br><br>
+                <label for="code">c++ code</label>
+                <textarea name="code" id="code" placeholder="Paste your c++ code here"
+                    style=" height: 25rem; resize: none;"></textarea></code>
+            </div>
+            <div style="display: flex; justify-content: right;">
+                <button type="submit" class="submit-btn">Save Problem</button>
             </div>
         </form>
 
     </div>
-            
-    <button type="submit" class="submit-btn">Save Problem</button>
 
 
-    </div>
+
+
+</div>
 </div>
 
 

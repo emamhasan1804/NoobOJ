@@ -231,6 +231,10 @@ func newProblemHandler(w http.ResponseWriter, r *http.Request) {
 	constraints := r.FormValue("constraints")
 	tagsRaw := r.FormValue("tags")
 	rating := r.FormValue("rating")
+	time := r.FormValue("time")
+	memory := r.FormValue("memory")
+	editorial := r.FormValue("editorial")
+	code := r.FormValue("code")
 
 	// Start a Transaction
 	tx, err := database.DB.Begin()
@@ -243,7 +247,7 @@ func newProblemHandler(w http.ResponseWriter, r *http.Request) {
 	defer tx.Rollback()
 	session, _ := store.Get(r, "session")
 	username, _ := session.Values["username"].(string)
-	res, err := tx.Exec("INSERT INTO problems (title, statement, input, output, constraints, author) VALUES (?, ?, ?, ?, ?,?)", title, statement, inputDesc, outputDesc, constraints, username)
+	res, err := tx.Exec("INSERT INTO problems (title, statement, input, output, constraints, author,time_limit,memory_limit,editorial,code) VALUES (?, ?, ?, ?, ?,?,?,?,?,?)", title, statement, inputDesc, outputDesc, constraints, username, time, memory, editorial, code)
 	if err != nil {
 		fmt.Fprint(w, "Error inserting problem: "+err.Error())
 		return
@@ -309,9 +313,9 @@ func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
 		admin = true
 	}
 	id := r.URL.Query().Get("id")
-	row := database.DB.QueryRow("SELECT title, statement,input,output,constraints,author FROM problems WHERE id = ? and visibility=1", id)
-	var title, statement, input, output, constraints, author string
-	err := row.Scan(&title, &statement, &input, &output, &constraints, &author)
+	row := database.DB.QueryRow("SELECT title, statement,input,output,constraints,author,time_limit,memory_limit FROM problems WHERE id = ? and visibility=1", id)
+	var title, statement, input, output, constraints, author, time, memory string
+	err := row.Scan(&title, &statement, &input, &output, &constraints, &author, &time, &memory)
 	if err != nil {
 		fmt.Fprint(w, "Problem not found")
 		return
@@ -393,6 +397,8 @@ func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
 		Input       string
 		Output      string
 		Constraints string
+		Time        string
+		Memory      string
 		Pusername   string
 		Logout      string
 		Items       []Testcases
@@ -401,6 +407,7 @@ func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
 		Author      string
 		ID          string
 		Admin       bool
+		One         string
 	}
 	data := PageData{
 		Title:       "Problem - " + id + " - NoobOJ",
@@ -409,6 +416,8 @@ func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
 		Input:       input,
 		Output:      output,
 		Constraints: constraints,
+		Time:        time,
+		Memory:      memory,
 		Pusername:   username,
 		Logout:      "Logout",
 		Items:       list,
@@ -417,6 +426,7 @@ func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
 		Author:      author,
 		ID:          id,
 		Admin:       admin,
+		One:         "1",
 	}
 	t.ExecuteTemplate(w, "index.html", data)
 }
@@ -485,12 +495,11 @@ func viewSubmissionHandler(w http.ResponseWriter, r *http.Request) {
 }
 func problemSubmissionsHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get(("id"))
-	rows, err := database.DB.Query("SELECT  submissions.id,  submissions.username,  submissions.submitted_at,  submissions.verdict  FROM submissions JOIN problems ON submissions.problem_id = problems.id WHERE submissions.problem_id = ?  AND problems.visibility = 1 ORDER BY submissions.id DESC", id)
+	rows, err := database.DB.Query("SELECT  id,  username,  submitted_at,  verdict  FROM submissions  WHERE submissions.problem_id = ? ORDER BY submissions.id DESC", id)
 	if err != nil {
 		fmt.Fprint(w, "Database error: "+err.Error())
 		return
 	}
-
 	defer rows.Close()
 
 	type Submissions struct {
@@ -505,10 +514,13 @@ func problemSubmissionsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var subs []Submissions
 	var title string
-	database.DB.QueryRow("SELECT title FROM problems WHERE id=?", id).Scan(&title)
-	x := 0
+	var visibility bool
+	database.DB.QueryRow("SELECT title,visibility FROM problems WHERE id=?", id).Scan(&title, &visibility)
+	if !visibility {
+		fmt.Fprint(w, "No problem found")
+		return
+	}
 	for rows.Next() {
-		x += 1
 		var p Submissions
 		if err := rows.Scan(&p.SubID, &p.Username, &p.Submitted_at, &p.Verdict); err != nil {
 			continue
@@ -518,10 +530,6 @@ func problemSubmissionsHandler(w http.ResponseWriter, r *http.Request) {
 		title = p.Title
 		p.ID = id
 		subs = append(subs, p)
-	}
-	if x < 1 {
-		fmt.Fprint(w, "No problem found")
-		return
 	}
 	type PageData struct {
 		Title        string
@@ -981,7 +989,7 @@ func administrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := database.DB.Query("SELECT id,title FROM problems WHERE author=?", username)
+	rows, err := database.DB.Query("SELECT id,title, visibility FROM problems WHERE author=?", username)
 	if err != nil {
 		fmt.Fprint(w, "Databae error: "+err.Error())
 		return
@@ -989,13 +997,14 @@ func administrationHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	type Problem struct {
-		ID    string
-		Title string
+		ID         string
+		Title      string
+		Visibility bool
 	}
 	var list []Problem
 	for rows.Next() {
 		var p Problem
-		if err := rows.Scan(&p.ID, &p.Title); err != nil {
+		if err := rows.Scan(&p.ID, &p.Title, &p.Visibility); err != nil {
 			continue
 		}
 		list = append(list, p)
@@ -1119,8 +1128,9 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		var title, statement, input, output, constraints, rating string
-		database.DB.QueryRow("SELECT title,statement,input,output,constraints from problems where id=?", id).Scan(&title, &statement, &input, &output, &constraints)
+		var title, statement, input, output, constraints, rating, editorial, code string
+		var time, memory int
+		database.DB.QueryRow("SELECT title,statement,input,output,constraints,time_limit,memory_limit,editorial,code from problems where id=?", id).Scan(&title, &statement, &input, &output, &constraints, &time, &memory, &editorial, &code)
 		database.DB.QueryRow("SELECT rating FROM ratings WHERE problem_id=?", id).Scan(&rating)
 		rows, err := database.DB.Query("SELECT tag from tags where problem_id=?", id)
 		var tags string
@@ -1158,6 +1168,10 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 			Constraints string
 			Rating      string
 			Tags        string
+			Time        int
+			Memory      int
+			Editorial   string
+			Code        string
 			Test        []Testdata
 			Hidden      string
 		}
@@ -1176,6 +1190,10 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 			Rating:      rating,
 			Tags:        tags,
 			Test:        test,
+			Time:        time,
+			Memory:      memory,
+			Editorial:   editorial,
+			Code:        code,
 			Hidden:      "hidden",
 		}
 		t.ExecuteTemplate(w, "index.html", data)
@@ -1326,6 +1344,33 @@ func contestsHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func toggleProblemVisibility(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "POST" {
+		session, _ := store.Get(r, "session")
+		username, _ := session.Values["username"].(string)
+		id := r.FormValue("id")
+		var author string
+		err := database.DB.QueryRow("SELECT author FROM problems WHERE id=?", id).Scan(&author)
+		if err != nil {
+			fmt.Fprint(w, "No problem found")
+			return
+		}
+		if username != author {
+			fmt.Fprint(w, "Access denied")
+			return
+		}
+
+		_, err = database.DB.Exec("update problems SET visibility = NOT visibility where id =?", id)
+		if err != nil {
+			fmt.Fprint(w, "Error updating visibility "+err.Error())
+			return
+		}
+
+	}
+	http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
+}
+
 func main() {
 	// Start 4 parallel judges (Change to 2 or 8 depending on your CPU cores)
 	startJudgeWorkers(2)
@@ -1338,6 +1383,7 @@ func main() {
 	http.HandleFunc("/register", registerHandler)
 	// admin pages
 	http.HandleFunc("/admin/new", requiredAdmin(newProblemHandler))
+	http.HandleFunc("/admin/toggle", requiredAdmin(toggleProblemVisibility))
 
 	// user pages
 	http.HandleFunc("/logout", logoutHandler)

@@ -18,9 +18,18 @@
     style="margin-left: 8rem;margin-right: 8rem; display: flex; justify-content: space-between;color: rgb(74, 74, 74);">
     <div style=" width: 75%; color: RGB(34,34,34);">
         <h2 style="display: flex;justify-content: center;">{{.Ptitle}}</h2>
+        <p style="display: flex;justify-content: center; margin: 0px;">
+            Time Limit: {{.Time}} {{if eq .Time .One}}second{{else}}seconds{{end}}
+        </p>
+        <p style="display: flex;justify-content: center; margin: 0px;">
+            Memory Limit: {{.Memory}} megabytes
+        </p>
         <hr>
-        <div style="display: flex; justify-content: center;">
-            <a style="text-decoration: none;" href="/profile?username={{.Author}}"><h6 style="margin: 0px; color: rgb(60, 0, 255);">Problem Author: {{.Author}}</h6></a>
+        <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+            <a style="text-decoration: none;" href="/profile?username={{.Author}}">
+                <h6 style="margin: 0px; color: rgb(60, 0, 255);">Problem Author: {{.Author}}</h6>
+            </a>
+
         </div>
         <hr>
         <br>
@@ -56,14 +65,14 @@
                 </th>
             </tr>
             <tr style="text-align: left;">
-                <td  style="white-space: normal; vertical-align: top; padding: 0.5rem;">
+                <td style="white-space: normal; vertical-align: top; padding: 0.5rem;">
                     <code class="text-with-enter" id="input">{{.Input}}</code>
                 </td>
             </tr>
             <tr style="text-align: left;">
                 <th style="padding: 5px; font-size: medium;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <code >output</code>
+                        <code>output</code>
                         <button onclick="copyOutput()">copy</button>
                     </div>
                 </th>
@@ -136,6 +145,10 @@
     </tr>
 
     </table>
+    <a href="/editorial/problem?id={{.ID}}"><button
+            style="font-size: 1rem; padding-top: 5px; width: 100%; padding-bottom: 5px;padding-left: 10px;padding-right: 10px; margin-bottom: 2rem;">
+            Editorial</button>
+    </a>
 
     <table style="border-collapse: collapse; width: 100%;margin-bottom: 2rem;">
         <tr>
