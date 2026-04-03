@@ -188,7 +188,7 @@
                 <label for="tags">Tags</label>
                 <input type="text" name="tags" value="{{.Tags}} " id="tags" rows="3" placeholder="Bruteforce"><br><br>
                 <label for="rating">Rating</label>
-                <input type="text" value="{{.Rating}}" name="rating" id="rating" rows="3" placeholder="800"
+                <input type="text" value="{{.Rating}}" name="rating" id="rating" required rows="3" placeholder="800"
                     style="width: 10%; margin-left: 5px;" inputmode="numeric" pattern="[0-9]{3,4}" maxlength="4"
                     minlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>

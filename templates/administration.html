@@ -83,7 +83,7 @@
 
         <div class="contests" style="display: block; width: 70%;">
             <div style="height: 8rem; width: 100%; display: flex; align-items: center; justify-content: right;">
-                <button class="create-btn" onclick="window.location.href='/admin/new'">
+                <button class="create-btn" onclick="window.location.href='/new/contest'">
                     <span class="plus">+</span> Contest
                 </button>
             </div>
@@ -149,7 +149,7 @@
                         transform: scale(0.97);
                     }
                 </style>
-                <button class="create-btn" onclick="window.location.href='/admin/new'">
+                <button class="create-btn" onclick="window.location.href='/new/problem'">
                     <span class="plus">+</span> Problem
                 </button>
             </div>
@@ -204,7 +204,7 @@
                     </td>
                     {{if .Visibility}}
                     <td
-                        style="width: 7rem; padding: 0px; margin: 0px; background-color: rgb(228, 44, 44);color: white; text-align: center; vertical-align: middle; padding-top: 5px;">
+                        style="width: 7rem; padding: 0px; margin: 0px; background-color: #ff4d4f;color: white; text-align: center; vertical-align: middle; padding-top: 5px;">
                         <form action="/admin/toggle" method="POST">
                             <input type="hidden" name="id" value="{{.ID}}">
                             <button type="submit" style="color: white; font-weight: bold; font-size: small;">
@@ -215,7 +215,7 @@
                     </td>
                     {{else}}
                     <td
-                        style="width: 7rem; padding: 0px; margin: 0px; background-color: green;color: white; text-align: center; vertical-align: middle; padding-top: 5px;">
+                        style="width: 7rem; padding: 0px; margin: 0px; background-color: rgb(5, 146, 5);color: white; text-align: center; vertical-align: middle; padding-top: 5px;">
                         <form method="POST" action="/admin/toggle">
                             <input type="hidden" name="id" value="{{.ID}}">
                             <button type="submit" style="color: white; font-weight: bold; font-size: small;">

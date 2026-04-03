@@ -168,7 +168,7 @@
     </div>
 
     <div class="content-container" style="width: 100%;">
-        <form style="margin: 20px;" action="/admin/new" method="POST">
+        <form style="margin: 20px;" action="/new/problem" method="POST">
             <div id="details" class="tab-content active section">
                 <label for="title">Problem Title</label>
                 <input type="text" name="title" id="title" placeholder="Enter problem title" required> <br><br>
@@ -188,7 +188,7 @@
                 <input type="text" name="tags" id="tags" rows="3" placeholder="Bruteforce"></textarea> <br><br>
                 <label for="rating">Rating</label>
                 <input type="text" name="rating" id="rating" rows="3" placeholder="800"
-                    style="width: 10%; margin-left: 5px;" inputmode="numeric" pattern="[0-9]{3,4}" maxlength="4"
+                    style="width: 10%; margin-left: 5px;" inputmode="numeric" pattern="[0-9]{3,4}" required maxlength="4"
                     minlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
 

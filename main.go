@@ -194,7 +194,7 @@ func newProblemHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		t, err := template.ParseFiles(
 			"templates/index.html",
-			"templates/new.html",
+			"templates/new_problem.html",
 			"templates/footer.html",
 		)
 		if err != nil {
@@ -300,7 +300,120 @@ func newProblemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/administration", http.StatusSeeOther)
+	http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
+}
+
+func newContestHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		t, err := template.ParseFiles(
+			"templates/index.html",
+			"templates/new_contest.html",
+			"templates/footer.html",
+		)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		session, _ := store.Get(r, "session")
+		username, _ := session.Values["username"].(string)
+		type PageData struct {
+			Title     string
+			Pusername string
+			Logout    string
+			Admin     bool
+		}
+		data := PageData{
+			Title:     "Create Contest - NoobOJ",
+			Pusername: username,
+			Logout:    "Logout",
+			Admin:     true,
+		}
+		t.ExecuteTemplate(w, "index.html", data)
+		return
+	}
+	// err := r.ParseForm()
+	// if err != nil {
+	// 	http.Error(w, "Parse error", http.StatusBadRequest)
+	// 	return
+	// }
+
+	// title := r.FormValue("title")
+	// statement := r.FormValue("statement")
+	// inputDesc := r.FormValue("input_desc")
+	// outputDesc := r.FormValue("output_desc")
+	// constraints := r.FormValue("constraints")
+	// tagsRaw := r.FormValue("tags")
+	// rating := r.FormValue("rating")
+	// time := r.FormValue("time")
+	// memory := r.FormValue("memory")
+	// editorial := r.FormValue("editorial")
+	// code := r.FormValue("code")
+
+	// // Start a Transaction
+	// tx, err := database.DB.Begin()
+	// if err != nil {
+	// 	http.Error(w, "Transaction error: "+err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// // Defer a rollback in case of any early returns
+	// defer tx.Rollback()
+	// session, _ := store.Get(r, "session")
+	// username, _ := session.Values["username"].(string)
+	// res, err := tx.Exec("INSERT INTO problems (title, statement, input, output, constraints, author,time_limit,memory_limit,editorial,code) VALUES (?, ?, ?, ?, ?,?,?,?,?,?)", title, statement, inputDesc, outputDesc, constraints, username, time, memory, editorial, code)
+	// if err != nil {
+	// 	fmt.Fprint(w, "Error inserting problem: "+err.Error())
+	// 	return
+	// }
+	// problemID, err := res.LastInsertId()
+	// if err != nil {
+	// 	fmt.Fprint(w, "Error getting last ID: "+err.Error())
+	// 	return
+	// }
+	// res, err = tx.Exec("INSERT INTO ratings(problem_id,rating) VALUES(?,?)", problemID, rating)
+	// if err != nil {
+	// 	fmt.Fprint(w, "Error inserting rating: "+err.Error())
+	// 	return
+	// }
+	// // Insert Tags (Splitting by comma)
+	// if tagsRaw != "" {
+	// 	tags := strings.Split(tagsRaw, ",")
+	// 	for _, tag := range tags {
+	// 		tag = strings.TrimSpace(tag)
+	// 		if tag != "" {
+	// 			_, err = tx.Exec("INSERT INTO tags (problem_id, tag) VALUES (?, ?)", problemID, tag)
+	// 			if err != nil {
+	// 				fmt.Fprint(w, "Error inserting tags: "+err.Error())
+	// 				return
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// testInputs := r.Form["test_input[]"]
+	// testOutputs := r.Form["test_output[]"]
+	// testTypes := r.Form["test_type[]"]
+
+	// for i := 0; i < len(testInputs); i++ {
+	// 	if testInputs[i] == "" && testOutputs[i] == "" {
+	// 		continue
+	// 	}
+
+	// 	_, err = tx.Exec("INSERT INTO test_cases (problem_id, input, output, type) VALUES (?, ?, ?, ?)", problemID, testInputs[i], testOutputs[i], testTypes[i])
+	// 	if err != nil {
+	// 		fmt.Fprint(w, "Error inserting test case: "+err.Error())
+	// 		return
+	// 	}
+	// }
+
+	// // Commit the transaction
+	// err = tx.Commit()
+	// if err != nil {
+	// 	fmt.Fprint(w, "Commit error: "+err.Error())
+	// 	return
+	// }
+
+	// http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
 }
 
 func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
@@ -1009,7 +1122,7 @@ func administrationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		list = append(list, p)
 	}
-	rows, err = database.DB.Query("SELECT id,title,visibility FROM authors join contests on authors.contest_id=contests.id WHERE username=?", username)
+	rows, err = database.DB.Query("SELECT id,title,visibility FROM authors join contests on authors.contest_id=contests.id WHERE author=?", username)
 	if err != nil {
 		fmt.Fprint(w, "Databae error: "+err.Error())
 		return
@@ -1100,7 +1213,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	database.DB.Exec("DELETE FROM problems WHERE id=?", id)
-	http.Redirect(w, r, "/administration", http.StatusSeeOther)
+	http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
 
 }
 func editHandler(w http.ResponseWriter, r *http.Request) {
@@ -1212,6 +1325,10 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		constraints := r.FormValue("constraints")
 		tagsRaw := r.FormValue("tags")
 		rating := r.FormValue("rating")
+		time := r.FormValue("time")
+		memory := r.FormValue("memory")
+		editorial := r.FormValue("editorial")
+		code := r.FormValue("code")
 
 		tx, err := database.DB.Begin()
 		if err != nil {
@@ -1223,7 +1340,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 		defer tx.Rollback()
 		// session, _ := store.Get(r, "session")
 		// username, _ := session.Values["username"].(string)
-		_, err = tx.Exec("UPDATE problems SET title=?, statement=?, input=?, output=?, constraints=? WHERE id=?", title, statement, inputDesc, outputDesc, constraints, id)
+		_, err = tx.Exec("UPDATE problems SET title=?, statement=?, input=?, output=?, constraints=?, time_limit=?, memory_limit=?, editorial=?, code=? WHERE id=?", title, statement, inputDesc, outputDesc, constraints, time, memory, editorial, code, id)
 		if err != nil {
 			fmt.Fprint(w, "Error updating problem: "+err.Error())
 			return
@@ -1283,7 +1400,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/administration", http.StatusSeeOther)
+		http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
 	}
 
 }
@@ -1371,6 +1488,9 @@ func toggleProblemVisibility(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
 }
 
+func announcementHandler(w http.ResponseWriter, r *http.Request) {
+}
+
 func main() {
 	// Start 4 parallel judges (Change to 2 or 8 depending on your CPU cores)
 	startJudgeWorkers(2)
@@ -1382,7 +1502,8 @@ func main() {
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/register", registerHandler)
 	// admin pages
-	http.HandleFunc("/admin/new", requiredAdmin(newProblemHandler))
+	http.HandleFunc("/new/problem", requiredAdmin(newProblemHandler))
+	http.HandleFunc("/new/contest", requiredAdmin(newContestHandler))
 	http.HandleFunc("/admin/toggle", requiredAdmin(toggleProblemVisibility))
 
 	// user pages
@@ -1399,6 +1520,7 @@ func main() {
 	http.HandleFunc("/delete/problem", requiredAdmin(deleteHandler))
 	http.HandleFunc("/edit/problem", requiredAdmin(editHandler))
 	http.HandleFunc("/contests", requiredLogin(contestsHandler))
+	http.HandleFunc("/announcement", requiredAdmin(announcementHandler))
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -1446,7 +1568,8 @@ func processSubmission(subID int) {
 		Code      string
 	}
 	var s Submission
-	err := database.DB.QueryRow("SELECT id, problem_id, code FROM submissions WHERE id = ?", subID).Scan(&s.ID, &s.ProblemID, &s.Code)
+	var username string
+	err := database.DB.QueryRow("SELECT id, problem_id, code, username FROM submissions WHERE id = ?", subID).Scan(&s.ID, &s.ProblemID, &s.Code, &username)
 	if err != nil {
 		return
 	}
@@ -1498,6 +1621,9 @@ func processSubmission(subID int) {
 			finalVerdict = "Wrong Answer"
 			break
 		}
+	}
+	if finalVerdict == "Accepted" {
+		database.DB.Exec("INSERT into streaks(username,problem_id) VALUES(?,?)", username, s.ProblemID)
 	}
 	database.DB.Exec("UPDATE submissions SET verdict=? WHERE id=?", finalVerdict, subID)
 }
