@@ -799,7 +799,12 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	// http.Redirect(w, r, "/login", http.StatusSeeOther)
+	session, _ := store.Get(r, "session")
+	session.Values["username"] = username
+	session.Values["user_type"] = "user"
+	session.Save(r, w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
