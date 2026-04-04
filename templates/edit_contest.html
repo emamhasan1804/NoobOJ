@@ -1,0 +1,344 @@
+{{define "content"}}
+
+<style>
+    .tabs-nav {
+        display: flex;
+        background-color: #f4f6f8;
+        border: 1px solid #d1d5db;
+        border-bottom: none;
+    }
+
+    .tab-btn {
+        border-radius: 0px;
+        background: none;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        color: #738f93;
+        transition: all 0.2s ease;
+        outline: none;
+        position: relative;
+        border-left: 1px solid transparent;
+        border-right: 1px solid transparent;
+    }
+
+    .tab-btn.active {
+        background-color: #ffffff;
+        color: #2c3e50;
+        border-left: 1px solid #d1d5db;
+        border-right: 1px solid #d1d5db;
+        margin-bottom: -1px;
+        z-index: 2;
+    }
+
+    .tab-btn.active::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #34495e;
+    }
+
+    .content-container {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        min-height: 200px;
+        border-radius: 0 0 4px 4px;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    label {
+        font-weight: 600;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    fieldset {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #fafafa;
+    }
+
+    legend {
+        font-weight: bold;
+    }
+
+    button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .add-btn {
+        background: #2d8cff;
+        color: white;
+    }
+
+    .remove-btn {
+        background: #ff4d4f;
+        color: white;
+        margin-top: 8px;
+    }
+
+    .submit-btn {
+        background: #28a745;
+        color: white;
+        font-weight: bold;
+        padding: 10px 18px;
+    }
+</style>
+
+<div style="margin: 0 8rem; display: flex; flex-direction: column; align-items: center;">
+    <div class="tabs-nav" style="width: 100%;">
+        <button style="margin-left: 1rem;" class="tab-btn active" onclick="openTab(event, 'details')">Details</button>
+        <button class="tab-btn" onclick="openTab(event, 'tasks')">Tasks</button>
+        <button class="tab-btn" onclick="openTab(event, 'moderators')">Moderators</button>
+        <button class="tab-btn" onclick="openTab(event, 'announcements')">Announcement</button>
+    </div>
+
+    <div class="content-container" style="width: 100%;">
+        <form style="margin: 20px;" action="/edit/contest?id={{.ID}}" method="POST">
+            <div id="details" class="tab-content active" style="width: 50%;">
+                <label for="title">Contest Name <span style="color: red;">*</span></label>
+                <input type="text" name="title" id="title" value="{{.Ptitle}}" required><br><br>
+
+                <div style="width: 50%;">
+                    <label>Start Time <span style="color: red;">*</span></label>
+                    <span id="tz_display" style="margin-left:10px; color:#666; font-size:13px;"></span><br>
+                    <input type="hidden" name="timezone" id="timezone">
+                    <input type="datetime-local" name="start" id="start" required><br><br>
+
+                    <label>End Time <span style="color: red;">*</span></label><br>
+                    <input type="datetime-local" name="end" id="end" required>
+                    <div id="time-error" style="color:red; font-size:13px; margin-top:6px;"></div>
+                </div>
+
+                <div style="display: flex; justify-content: right; margin-top: 16px;">
+                    <button type="submit" class="submit-btn" id="save-btn" onclick="return validateTimes()">Save
+                        Contest</button>
+                </div>
+            </div>
+
+            <div id="tasks" class="tab-content">
+                <div id="tasks-container">
+                    <fieldset>
+                        <legend>Test Case 1</legend>
+                        <label>Input</label>
+                        <textarea name="test_input[]" rows="3"></textarea>
+                        <label>Output</label>
+                        <textarea name="test_output[]" rows="3"></textarea>
+                        <label>Type</label>
+                        <select name="test_type[]">
+                            <option value="hidden">Hidden</option>
+                            <option value="sample">Sample</option>
+                        </select>
+                        <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
+                    </fieldset>
+                </div>
+                <button type="button" class="add-btn" onclick="addTestCase()">+ Add Test Case</button>
+                <div style="display: flex; justify-content: right;">
+                    <button type="submit" class="submit-btn">Save Problem</button>
+                </div>
+            </div>
+
+            <div id="moderators" class="tab-content">
+                <div style="display: flex; justify-content: right;">
+                    <button type="submit" class="submit-btn">Save Problem</button>
+                </div>
+            </div>
+        </form>
+
+        <div style="margin: 20px;" id="announcements" class="tab-content">
+            <form action="/announcement" method="post">
+                <label>Subject</label>
+                <input type="text" name="subject" required><br><br>
+                <label>Message</label>
+                <textarea name="announcement" style="height: 20rem;"></textarea>
+                <div style="display: flex; justify-content: right;">
+                    <button type="submit" class="submit-btn">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Tab switching ──────────────────────────────────────────────
+    function openTab(evt, tabName) {
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    // ── Test case helpers ──────────────────────────────────────────
+    function updateNumbers() {
+        document.querySelectorAll("#tasks-container fieldset").forEach((f, i) => {
+            f.querySelector("legend").textContent = "Test Case " + (i + 1);
+        });
+    }
+
+    function addTestCase() {
+        const container = document.getElementById("tasks-container");
+        const field = document.createElement("fieldset");
+        field.innerHTML = `<legend></legend>
+<label>Input</label><textarea name="test_input[]" rows="3"></textarea>
+<label>Output</label><textarea name="test_output[]" rows="3"></textarea>
+<label>Type</label><select name="test_type[]"><option value="hidden">Hidden</option><option value="sample">Sample</option></select>
+<button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>`;
+        container.appendChild(field);
+        updateNumbers();
+    }
+
+    function removeTestCase(btn) {
+        btn.parentElement.remove();
+        updateNumbers();
+    }
+
+    updateNumbers();
+
+    // ── Time setup ─────────────────────────────────────────────────
+    // Go sends unix milliseconds — new Date(ms) always parses correctly
+    const startMs = parseInt("{{.Start}}");
+    const endMs = parseInt("{{.End}}");
+
+    // ms → "YYYY-MM-DDTHH:MM" in browser local time
+    function msToLocalInput(ms) {
+        const d = new Date(ms);
+        const pad = n => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // datetime-local string → Date (browser treats it as local time)
+    function localInputToDate(val) {
+        return new Date(val);
+    }
+
+    // Date → datetime-local input string (local time)
+    function dateToLocalInput(d) {
+        const pad = n => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    const startInput = document.getElementById("start");
+    const endInput = document.getElementById("end");
+    const tzDisplay = document.getElementById("tz_display");
+    const tzHidden = document.getElementById("timezone");
+    const errorDiv = document.getElementById("time-error");
+
+    // Show browser timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    tzDisplay.textContent = `(${tz})`;
+    tzHidden.value = tz;
+
+    // Populate inputs — converted to browser local time
+    startInput.value = msToLocalInput(startMs);
+    endInput.value = msToLocalInput(endMs);
+
+    // Contest state
+    const now = new Date();
+    const startDate = new Date(startMs);
+    const endDate = new Date(endMs);
+
+    const hasStarted = now >= startDate;
+    const hasEnded = now >= endDate;
+
+    // Rule 4: disable start if already started
+    if (hasStarted) {
+        startInput.disabled = true;
+        startInput.title = "Contest has already started";
+    }
+
+    // Rule 5: disable end if already ended
+    if (hasEnded) {
+        endInput.disabled = true;
+        endInput.title = "Contest has already ended";
+    }
+
+    // Rule 6: start must be at least now+10min
+    if (!hasStarted) {
+        const minStart = new Date(now.getTime() + 10 * 60 * 1000);
+        startInput.min = dateToLocalInput(minStart);
+    }
+
+    // Rules 7 & 8: end min = max(now+5min, start+30min)
+    function updateEndMin() {
+        const minFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+        const startVal = localInputToDate(startInput.value);
+        const minFromStart = new Date(startVal.getTime() + 30 * 60 * 1000);
+        const minEnd = minFromStart > minFromNow ? minFromStart : minFromNow;
+
+        endInput.min = dateToLocalInput(minEnd);
+
+        // Auto-correct if current end value is below minimum
+        if (endInput.value && localInputToDate(endInput.value) < minEnd) {
+            endInput.value = dateToLocalInput(minEnd);
+        }
+    }
+
+    if (!hasEnded) {
+        updateEndMin();
+        startInput.addEventListener("change", updateEndMin);
+    }
+
+    // ── Validation on submit ───────────────────────────────────────
+    function validateTimes() {
+        errorDiv.textContent = "";
+        const now = new Date();
+
+        if (!startInput.disabled) {
+            const s = localInputToDate(startInput.value);
+            if (s < new Date(now.getTime() + 10 * 60 * 1000)) {
+                errorDiv.textContent = "Start time must be at least 10 minutes from now.";
+                return false;
+            }
+        }
+
+        if (!endInput.disabled) {
+            const s = localInputToDate(startInput.value);
+            const e = localInputToDate(endInput.value);
+            if (e < new Date(now.getTime() + 5 * 60 * 1000)) {
+                errorDiv.textContent = "End time must be at least 5 minutes from now.";
+                return false;
+            }
+            if (e < new Date(s.getTime() + 30 * 60 * 1000)) {
+                errorDiv.textContent = "End time must be at least 30 minutes after start time.";
+                return false;
+            }
+        }
+
+        return true;
+    }
+</script>
+
+{{end}}

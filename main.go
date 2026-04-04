@@ -31,14 +31,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 	session, _ := store.Get(r, "session")
 	username, ok := session.Values["username"].(string)
+	user_type, _ := session.Values["user_type"].(string)
 	logout := "Logout"
 	if !ok || session.Values["username"] == nil {
 		username = "Login"
 		logout = "Register"
 	}
 	var admin bool = false
-	var user_type string
-	database.DB.QueryRow("SELECT user_type FROM users WHERE username=?", username).Scan(&user_type)
 	if user_type == "admin" {
 		admin = true
 	}
@@ -60,9 +59,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 func problemsetHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, _ := session.Values["username"].(string)
+	user_type, _ := session.Values["user_type"].(string)
 	var admin bool = false
-	var user_type string
-	database.DB.QueryRow("SELECT user_type FROM users WHERE username=?", username).Scan(&user_type)
 	if user_type == "admin" {
 		admin = true
 	}
@@ -139,13 +137,16 @@ func problemsetHandler(w http.ResponseWriter, r *http.Request) {
 func leaderboardHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 	username, _ := session.Values["username"].(string)
+	user_type, _ := session.Values["user_type"].(string)
 	var admin bool = false
-	var user_type string
-	database.DB.QueryRow("SELECT user_type FROM users WHERE username=?", username).Scan(&user_type)
 	if user_type == "admin" {
 		admin = true
 	}
-	rows, err := database.DB.Query("select users.username,name,count(distinct submissions.problem_id) as cnt from users,submissions where users.username=submissions.username and verdict='Accepted' group by users.username,name order by cnt desc")
+	rows, err := database.DB.Query(`SELECT users.username,name,count(DISTINCT submissions.problem_id) AS cnt 
+									FROM users,submissions,problems 
+									WHERE users.username=submissions.username AND submissions.problem_id = problems.id AND verdict='Accepted' and visibility=1 
+									GROUP BY users.username,name 
+									ORDER BY cnt DESC`)
 	if err != nil {
 		fmt.Fprint(w, "Database error: "+err.Error())
 		return
@@ -304,7 +305,8 @@ func newProblemHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func newContestHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	switch r.Method {
+	case "GET":
 		t, err := template.ParseFiles(
 			"templates/index.html",
 			"templates/new_contest.html",
@@ -330,90 +332,74 @@ func newContestHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		t.ExecuteTemplate(w, "index.html", data)
 		return
+	case "POST":
+		name := r.FormValue("title")
+		startStr := r.FormValue("start")
+		endStr := r.FormValue("end")
+		tzStr := r.FormValue("timezone")
+
+		loc, err := time.LoadLocation(tzStr)
+		if err != nil {
+			loc = time.UTC
+		}
+
+		layout := "2006-01-02T15:04"
+
+		startTime, err := time.ParseInLocation(layout, startStr, loc)
+		if err != nil {
+			fmt.Fprint(w, "Invalid start time")
+			return
+		}
+
+		endTime, err := time.ParseInLocation(layout, endStr, loc)
+		if err != nil {
+			fmt.Fprint(w, "Invalid end time")
+			return
+		}
+
+		startTime = startTime.UTC()
+		endTime = endTime.UTC()
+		// Start a Transaction
+		tx, err := database.DB.Begin()
+		if err != nil {
+			http.Error(w, "Transaction error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer tx.Rollback()
+		session, _ := store.Get(r, "session")
+		username, _ := session.Values["username"].(string)
+		res, err := tx.Exec(
+			"INSERT INTO contests(title, start_time, end_time) VALUES (?, ?, ?)",
+			name,
+			startTime,
+			endTime,
+		)
+		if err != nil {
+			fmt.Fprint(w, "Error inserting contest: "+err.Error())
+			return
+		}
+		contestID, err := res.LastInsertId()
+		if err != nil {
+			fmt.Fprint(w, "Error getting last ID: "+err.Error())
+			return
+		}
+		res, err = tx.Exec("INSERT INTO authors(contest_id,author,role) VALUES(?,?,?)", contestID, username, "owner")
+		if err != nil {
+			fmt.Fprint(w, "Error inserting owner: "+err.Error())
+			return
+		}
+
+		err = tx.Commit()
+		if err != nil {
+			fmt.Fprint(w, "Commit error: "+err.Error())
+			return
+		}
+
+		http.Redirect(w, r, "/edit/contest?id="+strconv.Itoa(int(contestID)), http.StatusSeeOther)
+
+	default:
+		http.Redirect(w, r, "/administration?tab=contest", http.StatusSeeOther)
 	}
-	// err := r.ParseForm()
-	// if err != nil {
-	// 	http.Error(w, "Parse error", http.StatusBadRequest)
-	// 	return
-	// }
-
-	// title := r.FormValue("title")
-	// statement := r.FormValue("statement")
-	// inputDesc := r.FormValue("input_desc")
-	// outputDesc := r.FormValue("output_desc")
-	// constraints := r.FormValue("constraints")
-	// tagsRaw := r.FormValue("tags")
-	// rating := r.FormValue("rating")
-	// time := r.FormValue("time")
-	// memory := r.FormValue("memory")
-	// editorial := r.FormValue("editorial")
-	// code := r.FormValue("code")
-
-	// // Start a Transaction
-	// tx, err := database.DB.Begin()
-	// if err != nil {
-	// 	http.Error(w, "Transaction error: "+err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// // Defer a rollback in case of any early returns
-	// defer tx.Rollback()
-	// session, _ := store.Get(r, "session")
-	// username, _ := session.Values["username"].(string)
-	// res, err := tx.Exec("INSERT INTO problems (title, statement, input, output, constraints, author,time_limit,memory_limit,editorial,code) VALUES (?, ?, ?, ?, ?,?,?,?,?,?)", title, statement, inputDesc, outputDesc, constraints, username, time, memory, editorial, code)
-	// if err != nil {
-	// 	fmt.Fprint(w, "Error inserting problem: "+err.Error())
-	// 	return
-	// }
-	// problemID, err := res.LastInsertId()
-	// if err != nil {
-	// 	fmt.Fprint(w, "Error getting last ID: "+err.Error())
-	// 	return
-	// }
-	// res, err = tx.Exec("INSERT INTO ratings(problem_id,rating) VALUES(?,?)", problemID, rating)
-	// if err != nil {
-	// 	fmt.Fprint(w, "Error inserting rating: "+err.Error())
-	// 	return
-	// }
-	// // Insert Tags (Splitting by comma)
-	// if tagsRaw != "" {
-	// 	tags := strings.Split(tagsRaw, ",")
-	// 	for _, tag := range tags {
-	// 		tag = strings.TrimSpace(tag)
-	// 		if tag != "" {
-	// 			_, err = tx.Exec("INSERT INTO tags (problem_id, tag) VALUES (?, ?)", problemID, tag)
-	// 			if err != nil {
-	// 				fmt.Fprint(w, "Error inserting tags: "+err.Error())
-	// 				return
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// testInputs := r.Form["test_input[]"]
-	// testOutputs := r.Form["test_output[]"]
-	// testTypes := r.Form["test_type[]"]
-
-	// for i := 0; i < len(testInputs); i++ {
-	// 	if testInputs[i] == "" && testOutputs[i] == "" {
-	// 		continue
-	// 	}
-
-	// 	_, err = tx.Exec("INSERT INTO test_cases (problem_id, input, output, type) VALUES (?, ?, ?, ?)", problemID, testInputs[i], testOutputs[i], testTypes[i])
-	// 	if err != nil {
-	// 		fmt.Fprint(w, "Error inserting test case: "+err.Error())
-	// 		return
-	// 	}
-	// }
-
-	// // Commit the transaction
-	// err = tx.Commit()
-	// if err != nil {
-	// 	fmt.Fprint(w, "Commit error: "+err.Error())
-	// 	return
-	// }
-
-	// http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
 }
 
 func viewProblemHandler(w http.ResponseWriter, r *http.Request) {
@@ -1107,7 +1093,7 @@ func administrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := database.DB.Query("SELECT id,title, visibility FROM problems WHERE author=?", username)
+	rows, err := database.DB.Query("SELECT id,title, visibility FROM problems WHERE author=? ORDER BY id DESC", username)
 	if err != nil {
 		fmt.Fprint(w, "Databae error: "+err.Error())
 		return
@@ -1127,7 +1113,7 @@ func administrationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		list = append(list, p)
 	}
-	rows, err = database.DB.Query("SELECT id,title,visibility FROM authors join contests on authors.contest_id=contests.id WHERE author=?", username)
+	rows, err = database.DB.Query("SELECT id,title,visibility FROM authors join contests on authors.contest_id=contests.id WHERE author=? ORDER BY id DESC", username)
 	if err != nil {
 		fmt.Fprint(w, "Databae error: "+err.Error())
 		return
@@ -1221,7 +1207,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
 
 }
-func editHandler(w http.ResponseWriter, r *http.Request) {
+func editProblemHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	session, _ := store.Get(r, "session")
 	username, _ := session.Values["username"].(string)
@@ -1239,7 +1225,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		t, err := template.ParseFiles(
 			"templates/index.html",
-			"templates/edit.html",
+			"templates/edit_problem.html",
 			"templates/footer.html",
 		)
 		if err != nil {
@@ -1409,6 +1395,173 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+func editContestHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	session, _ := store.Get(r, "session")
+	username, _ := session.Values["username"].(string)
+	var role string
+	err := database.DB.QueryRow("SELECT role FROM authors WHERE contest_id=? AND author=?", id, username).Scan(&role)
+	if err != nil {
+		fmt.Fprint(w, "No contest found")
+		return
+	}
+	if role != "owner" && role != "moderator" {
+		fmt.Fprint(w, "Access denied")
+		return
+	}
+
+	if r.Method == "GET" {
+		t, err := template.ParseFiles(
+			"templates/index.html",
+			"templates/edit_contest.html",
+			"templates/footer.html",
+		)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var title string
+		var startBytes, endBytes []byte
+		var visibility bool
+
+		err = database.DB.QueryRow(
+			"SELECT title, start_time, end_time, visibility FROM contests WHERE id=?",
+			id,
+		).Scan(&title, &startBytes, &endBytes, &visibility)
+		if err != nil {
+			fmt.Fprint(w, "error scanning contest details: "+err.Error())
+			return
+		}
+
+		layout := "2006-01-02 15:04:05"
+		startTimeUTC, err := time.Parse(layout, string(startBytes))
+		if err != nil {
+			fmt.Fprint(w, "invalid start time from DB: "+err.Error())
+			return
+		}
+		endTimeUTC, err := time.Parse(layout, string(endBytes))
+		if err != nil {
+			fmt.Fprint(w, "invalid end time from DB: "+err.Error())
+			return
+		}
+
+		// Send raw UTC with Z suffix — browser JS will convert to local time
+		data := struct {
+			Title     string
+			Pusername string
+			Logout    string
+			Admin     bool
+			ID        string
+			Ptitle    string
+			Start     int64
+			End       int64
+		}{
+			Title:     "Administration - NoobOJ",
+			Pusername: username,
+			Logout:    "Logout",
+			Admin:     true,
+			ID:        id,
+			Ptitle:    title,
+			Start:     startTimeUTC.UTC().UnixMilli(),
+			End:       endTimeUTC.UTC().UnixMilli(),
+		}
+
+		t.ExecuteTemplate(w, "index.html", data)
+	}
+	// if r.Method == "POST" {
+	// 	err := r.ParseForm()
+	// 	if err != nil {
+	// 		http.Error(w, "Parse error", http.StatusBadRequest)
+	// 		return
+	// 	}
+
+	// 	title := r.FormValue("title")
+	// 	statement := r.FormValue("statement")
+	// 	inputDesc := r.FormValue("input_desc")
+	// 	outputDesc := r.FormValue("output_desc")
+	// 	constraints := r.FormValue("constraints")
+	// 	tagsRaw := r.FormValue("tags")
+	// 	rating := r.FormValue("rating")
+	// 	time := r.FormValue("time")
+	// 	memory := r.FormValue("memory")
+	// 	editorial := r.FormValue("editorial")
+	// 	code := r.FormValue("code")
+
+	// 	tx, err := database.DB.Begin()
+	// 	if err != nil {
+	// 		http.Error(w, "Transaction error: "+err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+
+	// 	// Defer a rollback in case of any early returns
+	// 	defer tx.Rollback()
+	// 	// session, _ := store.Get(r, "session")
+	// 	// username, _ := session.Values["username"].(string)
+	// 	_, err = tx.Exec("UPDATE problems SET title=?, statement=?, input=?, output=?, constraints=?, time_limit=?, memory_limit=?, editorial=?, code=? WHERE id=?", title, statement, inputDesc, outputDesc, constraints, time, memory, editorial, code, id)
+	// 	if err != nil {
+	// 		fmt.Fprint(w, "Error updating problem: "+err.Error())
+	// 		return
+	// 	}
+	// 	problemID := id
+	// 	_, err = tx.Exec("UPDATE ratings SET rating=? WHERE problem_id=?", rating, problemID)
+	// 	if err != nil {
+	// 		fmt.Fprint(w, "Error updating rating: "+err.Error())
+	// 		return
+	// 	}
+	// 	// Insert Tags (Splitting by comma)
+	// 	_, err = tx.Exec("DELETE FROM tags WHERE problem_id=?", problemID)
+	// 	if err != nil {
+	// 		fmt.Fprint(w, "Error deleting old tags: "+err.Error())
+	// 		return
+	// 	}
+	// 	if tagsRaw != "" {
+	// 		tags := strings.Split(tagsRaw, ",")
+	// 		for _, tag := range tags {
+	// 			tag = strings.TrimSpace(tag)
+	// 			if tag != "" {
+	// 				_, err = tx.Exec("INSERT INTO tags (problem_id, tag) VALUES (?, ?)", problemID, tag)
+	// 				if err != nil {
+	// 					fmt.Fprint(w, "Error inserting tags: "+err.Error())
+	// 					return
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// 	testInputs := r.Form["test_input[]"]
+	// 	testOutputs := r.Form["test_output[]"]
+	// 	testTypes := r.Form["test_type[]"]
+
+	// 	_, err = tx.Exec("DELETE FROM test_cases WHERE problem_id=?", problemID)
+	// 	if err != nil {
+	// 		fmt.Fprint(w, "Error deleting old test cases: "+err.Error())
+	// 		return
+	// 	}
+
+	// 	for i := 0; i < len(testInputs); i++ {
+	// 		if testInputs[i] == "" && testOutputs[i] == "" {
+	// 			continue
+	// 		}
+
+	// 		_, err = tx.Exec("INSERT INTO test_cases (problem_id, input, output, type) VALUES (?, ?, ?, ?)", problemID, testInputs[i], testOutputs[i], testTypes[i])
+	// 		if err != nil {
+	// 			fmt.Fprint(w, "Error inserting test case: "+err.Error())
+	// 			return
+	// 		}
+	// 	}
+
+	// 	// Commit the transaction
+	// 	err = tx.Commit()
+	// 	if err != nil {
+	// 		fmt.Fprint(w, "Commit error: "+err.Error())
+	// 		return
+	// 	}
+
+	// 	http.Redirect(w, r, "/administration?tab=problem", http.StatusSeeOther)
+	// }
+
+}
 
 func contestsHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
@@ -1523,7 +1676,8 @@ func main() {
 	http.HandleFunc("/leaderboard", requiredLogin(leaderboardHandler))
 	http.HandleFunc("/administration", requiredAdmin(administrationHandler))
 	http.HandleFunc("/delete/problem", requiredAdmin(deleteHandler))
-	http.HandleFunc("/edit/problem", requiredAdmin(editHandler))
+	http.HandleFunc("/edit/problem", requiredAdmin(editProblemHandler))
+	http.HandleFunc("/edit/contest", requiredAdmin(editContestHandler))
 	http.HandleFunc("/contests", requiredLogin(contestsHandler))
 	http.HandleFunc("/announcement", requiredAdmin(announcementHandler))
 	http.ListenAndServe(":8080", nil)

@@ -1,104 +1,12 @@
 {{define "content"}}
 
 <style>
-    .tabs-nav {
-        display: flex;
-        background-color: #f4f6f8;
-        border: 1px solid #d1d5db;
-        border-bottom: none;
-    }
-
-    .tab-btn {
-        border-radius: 0px;
-        background: none;
-        border: none;
-        padding: 12px 20px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        color: #738f93;
-        transition: all 0.2s ease;
-        outline: none;
-        position: relative;
-        border-left: 1px solid transparent;
-        border-right: 1px solid transparent;
-    }
-
-    .tab-btn.active {
-        background-color: #ffffff;
-        color: #2c3e50;
-        border-left: 1px solid #d1d5db;
-        border-right: 1px solid #d1d5db;
-        margin-bottom: -1px;
-        z-index: 2;
-    }
-
-    .tab-btn.active::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background-color: #34495e;
-    }
-
-    .content-container {
-        border: 1px solid #d1d5db;
-        background: #fff;
-        min-height: 200px;
-        border-radius: 0 0 4px 4px;
-    }
-
-    .tab-content {
-        display: none;
-    }
-
-    .tab-content.active {
-        display: block;
-        animation: fadeIn 0.3s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(5px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
-<style>
-    .container {
-        max-width: 800px;
-        margin: auto;
-        background: white;
-        padding: 30px;
-        border: 1px solid rgb(74, 74, 74);
-    }
-
-    label {
-        font-weight: 600;
-    }
-
-    textarea {
-        resize: vertical;
-    }
-
-    fieldset {
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 15px;
-        margin-bottom: 15px;
-        background: #fafafa;
-    }
-
-    legend {
+    .submit-btn {
+        background: #28a745;
+        color: white;
         font-weight: bold;
+        padding: 10px 18px;
+        font-size: 15px;
     }
 
     button {
@@ -108,110 +16,36 @@
         cursor: pointer;
         font-size: 14px;
     }
-
-    .add-btn {
-        background: #2d8cff;
-        color: white;
-    }
-
-    .remove-btn {
-        background: #ff4d4f;
-        color: white;
-        margin-top: 8px;
-    }
-
-    .submit-btn {
-        background: #28a745;
-        color: white;
-        font-weight: bold;
-        padding: 10px 18px;
-    }
 </style>
 
-<div style="margin: 0 8rem; display: flex; flex-direction: column; align-items: center;">
+<div style="margin-left: 8rem; margin-right: 8rem; width: 40%;">
 
-    <div class="tabs-nav" style="width: 100%;">
-        <button style="margin-left: 1rem;" class="tab-btn active" onclick="openTab(event, 'details')">Details</button>
-        <button class="tab-btn" onclick="openTab(event, 'tasks')">Tasks</button>
-        <button class="tab-btn" onclick="openTab(event, 'moderators')">Moderators</button>
-        <button class="tab-btn" onclick="openTab(event, 'announcements')">Accouncement</button>
-    </div>
-
-    <div class="content-container" style="width: 100%;">
-        <form style="margin: 20px;" action="/new/contest" method="POST">
-
-            <div id="details" class="tab-content active">
-
-                <label>Contest Name *</label>
-                <input type="text" name="title" required><br><br>
-
-                <label>Start Time *</label>
-                <input type="datetime-local" name="start" id="start" required>
-                <input type="hidden" name="timezone" id="timezone">
-                <span id="tz_display" style="margin-left:10px; color:#666;"></span>
-                <br><br>
-
-                <label>End Time *</label>
-                <input type="datetime-local" name="end" id="end" required>
-                <div style="display: flex; justify-content: right;">
-                    <button type="submit" class="submit-btn">Save Problem</button>
-                </div>
-            </div>
-
-            <div id="tasks" class="tab-content">
-                <div id="tasks-container">
-                    <fieldset>
-                        <legend>Test Case 1</legend>
-
-                        <label>Input</label>
-                        <textarea name="test_input[]" rows="3"></textarea>
-
-                        <label>Output</label>
-                        <textarea name="test_output[]" rows="3"></textarea>
-
-                        <label>Type</label>
-                        <select name="test_type[]">
-                            <option value="hidden">Hidden</option>
-                            <option value="sample">Sample</option>
-                        </select>
-
-                        <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
-                    </fieldset>
-
-                </div>
-
-                <button type="button" class="add-btn" onclick="addTestCase()">+ Add Test Case</button>
-                <div style="display: flex; justify-content: right;">
-                    <button type="submit" class="submit-btn">Save Problem</button>
-                </div>
-            </div>
-
-            <div id="moderators" class="tab-content">
-                <div style="display: flex; justify-content: right;">
-                    <button type="submit" class="submit-btn">Save Problem</button>
-                </div>
-            </div>
+    <form style="margin: 20px;" action="/new/contest" method="POST">
+        <h2>Create Contest</h2>
+        <label for="title">Contest Name <span style="color: red;">*</span></label>
+        <input type="text" name="title" id="title" required><br><br>
 
 
-        </form>
+        <div style="width: 50%;">
 
-        <div style="margin: 20px;" id="announcements" class="tab-content">
-            <form  action="/announcement" method="post">
-                <label>Subject</label>
-                <input type="text" name="subject" required>
-                <br><br>
-                <label>Message</label>
-                <textarea name="announcement" style="height: 20rem;"></textarea>
+            <label>Start Time <span style="color: red;">*</span></label>
+            <input type="hidden" name="timezone" id="timezone">
 
-                <div style="display: flex; justify-content: right;">
-                    <button type="submit" class="submit-btn">Post</button>
-                </div>
-
-            </form>
+            <span id="tz_display" style="margin-left:10px; color:#666;"></span>
+            <input type="datetime-local" name="start" id="start" required> <br><br>
+            <label>End Time <span style="color: red;">*</span></label>
+            <input type="datetime-local" name="end" id="end" required>
         </div>
 
-    </div>
+        <div style="display: flex; justify-content: right;">
+            <button type="submit" class="submit-btn">Save Problem</button>
+        </div>
+    </form>
 </div>
+
+
+
+
 
 <!-- timezone script -->
 <script>
@@ -315,61 +149,6 @@
             enforceEnd();
         }, 30000);
     });
-</script>
-
-<script>
-    function updateNumbers() {
-        const fieldsets = document.querySelectorAll("#tasks-container fieldset");
-        fieldsets.forEach((f, i) => {
-            f.querySelector("legend").textContent = "Test Case " + (i + 1);
-        });
-    }
-
-    function addTestCase() {
-        const container = document.getElementById("tasks-container");
-        const field = document.createElement("fieldset");
-
-        field.innerHTML = `
-        <legend></legend>
-        <label>Input</label>
-        <textarea name="test_input[]" rows="3"></textarea>
-        <label>Output</label>
-        <textarea name="test_output[]" rows="3"></textarea>
-        <label>Type</label>
-        <select name="test_type[]">
-            <option value="hidden">Hidden</option>
-            <option value="sample">Sample</option>
-        </select>
-        <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
-    `;
-
-        container.appendChild(field);
-        updateNumbers();
-    }
-
-    function removeTestCase(btn) {
-        btn.parentElement.remove();
-        updateNumbers();
-    }
-
-    updateNumbers();
-</script>
-
-<script>
-    function openTab(evt, tabName) {
-        let tabcontent = document.getElementsByClassName("tab-content");
-        for (let i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
-        }
-
-        let tablinks = document.getElementsByClassName("tab-btn");
-        for (let i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
-        }
-
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
-    }
 </script>
 
 {{end}}
