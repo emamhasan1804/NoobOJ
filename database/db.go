@@ -3,6 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -23,4 +25,18 @@ func Connect() {
 	}
 
 	fmt.Println("Database connected")
+	runSchema()
+	log.Println("Database connected and schema applied.")
+}
+
+func runSchema() {
+	schema, err := os.ReadFile("database/schema.sql")
+	if err != nil {
+		log.Fatal("Error reading schema.sql: ", err)
+	}
+
+	_, err = DB.Exec(string(schema))
+	if err != nil {
+		log.Fatal("Error executing schema: ", err)
+	}
 }

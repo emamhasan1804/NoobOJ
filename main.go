@@ -750,7 +750,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			Admin     bool
 		}
 		data := PageData{
-			Title:     "Login - NoobOJ",
+			Title:     "Register - NoobOJ",
 			Pusername: "Login",
 			Logout:    "Register",
 			Admin:     false,
