@@ -1,0 +1,119 @@
+{{define "content"}}
+<style>
+    .auth-shell {
+        margin: 0 8rem 1.5rem;
+        display: flex;
+        justify-content: center;
+        color: var(--text-main);
+    }
+
+    .auth-card {
+        width: min(430px, 100%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: var(--shadow-card);
+        padding: 1.2rem;
+    }
+
+    .auth-card h1 {
+        margin: 0 0 0.35rem;
+        font-size: 1.18rem;
+        letter-spacing: -0.01em;
+    }
+
+    .auth-card p {
+        margin: 0 0 1rem;
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .auth-form {
+        display: grid;
+        gap: 0.8rem;
+    }
+
+    .auth-form label {
+        display: grid;
+        gap: 0.3rem;
+        color: #31455f;
+        font-size: 0.86rem;
+        font-weight: 650;
+    }
+
+    .auth-form input {
+        width: 100%;
+        margin: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 0.62rem 0.72rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
+    .auth-submit,
+    .auth-link-btn {
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .auth-submit {
+        border: 1px solid var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+        padding: 0.62rem 0.9rem;
+    }
+
+    .auth-link-btn {
+        border: 1px solid var(--border);
+        background: #ffffff;
+        color: var(--accent);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.86rem;
+    }
+
+    .auth-link-btn:hover {
+        background: var(--accent-soft);
+        border-color: #c7d8ec;
+    }
+
+    .auth-foot {
+        margin-top: 0.9rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    @media (max-width: 1100px) {
+        .auth-shell {
+            margin: 0 1rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .auth-shell {
+            margin: 0 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="auth-shell">
+    <div class="auth-card">
+        <h1>Login into NoobOJ</h1>
+        <form class="auth-form" action="/login" method="POST">
+            <label for="email">Email
+                <input type="email" name="email" id="email" required>
+            </label>
+            <label for="password">Password
+                <input type="password" name="password" id="password" required>
+            </label>
+            <button type="submit" class="auth-submit">Login</button>
+        </form>
+        <div class="auth-foot">
+            <button type="button" class="auth-link-btn" onclick="window.location.href='/register'">Create an account</button>
+        </div>
+    </div>
+</section>
+{{end}}

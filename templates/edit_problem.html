@@ -1,0 +1,610 @@
+{{define "content"}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+    .edit-shell {
+        margin: 0 8rem 1.5rem;
+        color: var(--text-main);
+    }
+
+    .edit-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+    }
+
+    .edit-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid rgba(49, 69, 95, 0.16);
+        background: #f9fbff;
+    }
+
+    .tab-btn {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: #ffffff;
+        color: #415368;
+        padding: 0.45rem 0.7rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.86rem;
+        font-weight: 650;
+    }
+
+    .tab-btn.active,
+    .tab-btn:hover {
+        background: var(--accent-soft);
+        border-color: #c7d8ec;
+        color: var(--accent);
+    }
+
+    .edit-form {
+        padding: 1rem;
+        display: grid;
+        gap: 1rem;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .form-grid {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field {
+        display: grid;
+        gap: 0.32rem;
+    }
+
+    .field label,
+    .section-title {
+        color: #31455f;
+        font-size: 0.86rem;
+        font-weight: 650;
+    }
+
+    .field input,
+    .field textarea,
+    .field select,
+    .tag-container input {
+        width: 100%;
+        margin: 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: #ffffff;
+        padding: 0.6rem 0.7rem;
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
+    textarea {
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .required-mark {
+        color: #b5483d;
+    }
+
+    .tag-container {
+        position: relative;
+        display: grid;
+        gap: 0.45rem;
+        max-width: 520px;
+    }
+
+    .suggestions {
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: #ffffff;
+    }
+
+    .suggestions:empty {
+        display: none;
+    }
+
+    .suggestion-item {
+        padding: 0.45rem 0.6rem;
+        cursor: pointer;
+        color: var(--text-main);
+        font-size: 0.88rem;
+    }
+
+    .suggestion-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    #selected-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .tag-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: #f8fbff;
+        padding: 0.22rem 0.5rem;
+        color: #415368;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    fieldset {
+        border: 1px solid rgba(49, 69, 95, 0.18);
+        border-radius: var(--radius-lg);
+        padding: 0.9rem;
+        margin: 0 0 0.75rem;
+        background: #fbfdff;
+        display: grid;
+        gap: 0.65rem;
+    }
+
+    legend {
+        padding: 0 0.35rem;
+        color: #31455f;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .language-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+    }
+
+    .language-pill {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: #f8fbff;
+        color: var(--accent);
+        padding: 0.28rem 0.58rem;
+        font-size: 0.84rem;
+        font-weight: 650;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid rgba(49, 69, 95, 0.14);
+        padding-top: 1rem;
+    }
+
+    .add-btn,
+    .remove-btn,
+    .submit-btn {
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        padding: 0.52rem 0.78rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+    }
+
+    .add-btn {
+        background: var(--accent-soft);
+        border-color: #c7d8ec;
+        color: var(--accent);
+    }
+
+    .remove-btn {
+        background: #fff5f4;
+        border-color: #efc4bf;
+        color: #8a3026;
+        width: fit-content;
+    }
+
+    .submit-btn {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
+    }
+
+    .CodeMirror {
+        height: 360px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: #162335;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.88rem;
+        line-height: 1.5;
+    }
+
+    .CodeMirror-gutters {
+        border-right: 1px solid rgba(49, 69, 95, 0.16);
+        background: #fbfdff;
+    }
+
+    .CodeMirror-linenumber {
+        color: #8a98aa;
+    }
+
+    .cm-s-default .cm-keyword { color: #1f4e7a; font-weight: 700; }
+    .cm-s-default .cm-string { color: #8a4a12; }
+    .cm-s-default .cm-comment { color: #6c7f93; font-style: italic; }
+    .cm-s-default .cm-number { color: #246641; }
+    .cm-s-default .cm-def,
+    .cm-s-default .cm-variable-2 { color: #7a3d7c; }
+
+    @media (max-width: 1100px) {
+        .edit-shell { margin: 0 1rem 1.5rem; }
+    }
+
+    @media (max-width: 700px) {
+        .edit-shell { margin: 0 0.75rem 1.5rem; }
+        .two-col { grid-template-columns: 1fr; }
+        .form-actions .submit-btn { width: 100%; }
+    }
+</style>
+
+<section class="edit-shell">
+    <div class="edit-card">
+        <div class="edit-tabs">
+            <button type="button" class="tab-btn active" onclick="openTab(event, 'details')">Details</button>
+            <button type="button" class="tab-btn" onclick="openTab(event, 'test-case')">Test Cases</button>
+            <button type="button" class="tab-btn" onclick="openTab(event, 'languages')">Languages</button>
+            <button type="button" class="tab-btn" onclick="openTab(event, 'editoriaL')">Editorial</button>
+        </div>
+
+        <form class="edit-form" action="/edit/problem?id={{.ID}}" method="POST">
+            <div id="details" class="tab-content active">
+                <div class="field">
+                    <label for="title">Problem Title <span class="required-mark">*</span></label>
+                    <input type="text" value="{{.Ptitle}}" name="title" id="title" placeholder="Enter problem title" required>
+                </div>
+                <div class="field">
+                    <label for="statement">Problem Statement <span class="required-mark">*</span></label>
+                    <textarea name="statement" id="statement" rows="8" placeholder="Describe the problem" required>{{.Statement}}</textarea>
+                </div>
+                <div class="two-col form-grid">
+                    <div class="field">
+                        <label for="input_desc">Input <span class="required-mark">*</span></label>
+                        <textarea name="input_desc" id="input_desc" rows="4" placeholder="Describe the input" required>{{.Input}}</textarea>
+                    </div>
+                    <div class="field">
+                        <label for="output_desc">Output <span class="required-mark">*</span></label>
+                        <textarea name="output_desc" id="output_desc" rows="4" placeholder="Describe the output" required>{{.Output}}</textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="constraints">Constraints</label>
+                    <textarea name="constraints" id="constraints" rows="4" placeholder="e.g. 1 <= N <= 10^5">{{.Constraints}}</textarea>
+                </div>
+                <div class="two-col form-grid">
+                    <div class="field">
+                        <label for="tag-input">Tags</label>
+                        <div class="tag-container">
+                            <input type="text" id="tag-input" placeholder="Type to search tags...">
+                            <div id="tag-suggestions" class="suggestions"></div>
+                            <div id="selected-tags"></div>
+                        </div>
+                        <input type="hidden" name="tags" id="tags">
+                    </div>
+                    <div class="field">
+                        <label for="rating">Rating</label>
+                        <select name="rating" id="rating" required>
+                    <option value="800" {{if eq .Rating 800}}selected{{end}}>800</option>
+                    <option value="900" {{if eq .Rating 900}}selected{{end}}>900</option>
+                    <option value="1000" {{if eq .Rating 1000}}selected{{end}}>1000</option>
+                    <option value="1100" {{if eq .Rating 1100}}selected{{end}}>1100</option>
+                    <option value="1200" {{if eq .Rating 1200}}selected{{end}}>1200</option>
+                    <option value="1300" {{if eq .Rating 1300}}selected{{end}}>1300</option>
+                    <option value="1400" {{if eq .Rating 1400}}selected{{end}}>1400</option>
+                    <option value="1500" {{if eq .Rating 1500}}selected{{end}}>1500</option>
+                    <option value="1600" {{if eq .Rating 1600}}selected{{end}}>1600</option>
+                    <option value="1700" {{if eq .Rating 1700}}selected{{end}}>1700</option>
+                    <option value="1800" {{if eq .Rating 1800}}selected{{end}}>1800</option>
+                    <option value="1900" {{if eq .Rating 1900}}selected{{end}}>1900</option>
+                    <option value="2000" {{if eq .Rating 2000}}selected{{end}}>2000</option>
+                    <option value="2100" {{if eq .Rating 2100}}selected{{end}}>2100</option>
+                    <option value="2200" {{if eq .Rating 2200}}selected{{end}}>2200</option>
+                    <option value="2300" {{if eq .Rating 2300}}selected{{end}}>2300</option>
+                    <option value="2400" {{if eq .Rating 2400}}selected{{end}}>2400</option>
+                    <option value="2500" {{if eq .Rating 2500}}selected{{end}}>2500</option>
+                    <option value="2600" {{if eq .Rating 2600}}selected{{end}}>2600</option>
+                    <option value="2700" {{if eq .Rating 2700}}selected{{end}}>2700</option>
+                    <option value="2800" {{if eq .Rating 2800}}selected{{end}}>2800</option>
+                    <option value="2900" {{if eq .Rating 2900}}selected{{end}}>2900</option>
+                    <option value="3000" {{if eq .Rating 3000}}selected{{end}}>3000</option>
+                    <option value="3100" {{if eq .Rating 3100}}selected{{end}}>3100</option>
+                    <option value="3200" {{if eq .Rating 3200}}selected{{end}}>3200</option>
+                    <option value="3300" {{if eq .Rating 3300}}selected{{end}}>3300</option>
+                    <option value="3400" {{if eq .Rating 3400}}selected{{end}}>3400</option>
+                    <option value="3500" {{if eq .Rating 3500}}selected{{end}}>3500</option>
+                </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="test-case" class="tab-content">
+                <div>
+                    <div class="section-title">Test Cases</div>
+                    <div id="test-case-container">
+                        {{range .Test}}
+                        <fieldset>
+                            <legend>Test Case 1</legend>
+                            <div class="two-col form-grid">
+                                <div class="field">
+                                    <label>Input</label>
+                                    <textarea name="test_input[]" rows="4">{{.Input}}</textarea>
+                                </div>
+                                <div class="field">
+                                    <label>Output</label>
+                                    <textarea name="test_output[]" rows="4">{{.Output}}</textarea>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>Type</label>
+                                {{if eq .Type $.Hidden}}
+                                <select name="test_type[]">
+                                    <option value="hidden">Hidden</option>
+                                    <option value="sample">Sample (Visible)</option>
+                                </select>
+                                {{else}}
+                                <select name="test_type[]">
+                                    <option value="sample">Sample (Visible)</option>
+                                    <option value="hidden">Hidden</option>
+                                </select>
+                                {{end}}
+                            </div>
+                            <button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
+                        </fieldset>
+                        {{end}}
+                    </div>
+                    <button type="button" class="add-btn" onclick="addTestCase()">+ Add Test Case</button>
+                </div>
+            </div>
+
+            <div id="languages" class="tab-content">
+                <div class="language-row">
+                    <span class="section-title">Language</span>
+                    <span class="language-pill">C++14</span>
+                </div>
+                <div class="two-col form-grid">
+                    <div class="field">
+                        <label for="time">Time limit (seconds)</label>
+                        <input type="number" name="time" id="time" min="1" max="5" value="{{.Time}}" required>
+                    </div>
+                    <div class="field">
+                        <label for="memory">Memory limit (MB)</label>
+                        <input type="number" name="memory" id="memory" min="256" max="512" value="{{.Memory}}" required>
+                    </div>
+                </div>
+            </div>
+
+            <div id="editoriaL" class="tab-content">
+                <div class="field">
+                    <label for="editorial">Editorial</label>
+                    <textarea name="editorial" id="editorial" rows="8" placeholder="Describe the solution">{{.Editorial}}</textarea>
+                </div>
+                <div class="field">
+                    <label for="code">C++ code</label>
+                    <textarea name="code" id="code" placeholder="Paste your c++ code here" spellcheck="false" autocapitalize="off" autocomplete="off">{{.Code}}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn" onclick="isSaving = true;">Save Problem</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+
+    function updateNumbers() {
+        const fieldsets = document.querySelectorAll("#test-case-container fieldset")
+
+        fieldsets.forEach((f, i) => {
+            f.querySelector("legend").textContent = "Test Case " + (i + 1)
+        })
+    }
+
+    function addTestCase() {
+
+        const container = document.getElementById("test-case-container")
+
+        const field = document.createElement("fieldset")
+
+        field.innerHTML = `
+<legend></legend>
+<div class="two-col form-grid">
+    <div class="field">
+        <label>Input</label>
+        <textarea name="test_input[]" rows="4"></textarea>
+    </div>
+    <div class="field">
+        <label>Output</label>
+        <textarea name="test_output[]" rows="4"></textarea>
+    </div>
+</div>
+<div class="field">
+    <label>Type</label>
+    <select name="test_type[]">
+        <option value="hidden">Hidden</option>
+        <option value="sample">Sample (Visible)</option>
+    </select>
+</div>
+<button type="button" class="remove-btn" onclick="removeTestCase(this)">Remove</button>
+`
+
+        container.appendChild(field)
+
+        updateNumbers()
+    }
+
+    function removeTestCase(btn) {
+        btn.parentElement.remove()
+        updateNumbers()
+    }
+
+    updateNumbers()
+
+</script>
+<script>
+    function openTab(evt, tabName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tab-content" and hide them
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+
+        // Get all elements with class="tab-btn" and remove the class "active"
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+        if (window.problemCodeEditor) {
+            setTimeout(function () { window.problemCodeEditor.refresh(); }, 0);
+        }
+    }
+</script>
+<script>
+    const allTags = [
+        {{range .Tags}}
+            {id: {{.ID}}, name: "{{.Name}}"},
+        {{end}}
+    ];
+
+    let selected = [
+        {{range .SelectedTags}}
+            {id: {{.ID}}, name: "{{.Name}}"},
+        {{end}}
+    ];
+
+    const input = document.getElementById("tag-input");
+    const suggestions = document.getElementById("tag-suggestions");
+    const selectedDiv = document.getElementById("selected-tags");
+    const hiddenInput = document.getElementById("tags");
+
+    function addTag(tag) {
+        if (!selected.find(s => s.id === tag.id)) {
+            selected.push(tag);
+        }
+        input.value = "";
+        suggestions.innerHTML = "";
+        renderTags();
+    }
+
+    function removeTag(id) {
+        selected = selected.filter(t => t.id !== id);
+        renderTags();
+    }
+
+    function renderTags() {
+        selectedDiv.innerHTML = "";
+        selected.forEach(tag => {
+            const span = document.createElement("span");
+            span.classList.add("tag-chip");
+            span.innerHTML = `${tag.name} <button type="button" onclick="removeTag(${tag.id})" aria-label="Remove tag">x</button>`;
+            selectedDiv.appendChild(span);
+        });
+        hiddenInput.value = selected.map(t => t.id).join(",");
+    }
+
+    input.addEventListener("input", function () {
+        const val = input.value.toLowerCase();
+        suggestions.innerHTML = "";
+        if (!val) return;
+        const filtered = allTags.filter(t =>
+            t.name.toLowerCase().includes(val) &&
+            !selected.find(s => s.id === t.id)
+        );
+        filtered.forEach(tag => {
+            const div = document.createElement("div");
+            div.innerText = tag.name;
+            div.classList.add("suggestion-item");
+            div.onclick = () => addTag(tag);
+            suggestions.appendChild(div);
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", renderTags);
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script>
+    (function () {
+        var textarea = document.getElementById("code");
+        if (!textarea || !window.CodeMirror) return;
+
+        window.problemCodeEditor = CodeMirror.fromTextArea(textarea, {
+            mode: "text/x-c++src",
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            autoCloseBrackets: true,
+            lineWrapping: false,
+            viewportMargin: Infinity,
+            extraKeys: {
+                Tab: function (cm) {
+                    if (cm.somethingSelected()) {
+                        cm.indentSelection("add");
+                    } else {
+                        cm.replaceSelection("    ", "end");
+                    }
+                }
+            }
+        });
+
+        window.problemCodeEditor.on("change", function (cm) {
+            cm.save();
+        });
+
+        var form = textarea.closest("form");
+        if (form) {
+            form.addEventListener("submit", function () {
+                window.problemCodeEditor.save();
+            });
+        }
+    })();
+</script>
+
+<!-- Add this flag variable -->
+<script>
+  let isSaving = false;
+</script>
+
+<!-- Updated beforeunload listener -->
+<script>
+window.addEventListener("beforeunload", function (e) {
+    if (isSaving) return; // Skip warning when saving
+    e.preventDefault();
+    e.returnValue = "";
+});
+</script>
+
+{{end}}

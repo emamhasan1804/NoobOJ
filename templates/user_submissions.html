@@ -1,0 +1,184 @@
+{{define "content"}}
+<style>
+    .subs-shell {
+        margin: 0 8rem 1.5rem;
+        display: grid;
+        gap: 12px;
+        color: var(--text-main);
+    }
+
+    .subs-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+    }
+
+    .subs-head {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid rgba(49, 69, 95, 0.16);
+        display: flex;
+        justify-content: space-between;
+        gap: 0.7rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .subs-head h1 {
+        margin: 0;
+        font-size: 1.08rem;
+        letter-spacing: -0.01em;
+    }
+
+    .subs-head p {
+        margin: 0;
+        color: var(--text-soft);
+        font-size: 0.84rem;
+    }
+
+    .subs-table-wrap {
+        overflow-x: auto;
+    }
+
+    .subs-table {
+        width: 100%;
+        min-width: 860px;
+        border-collapse: collapse;
+    }
+
+    .subs-table th,
+    .subs-table td {
+        padding: 0.68rem 0.72rem;
+        border-bottom: 1px solid rgba(49, 69, 95, 0.18);
+        border-right: 1px solid rgba(49, 69, 95, 0.12);
+        font-size: 0.88rem;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .subs-table th:last-child,
+    .subs-table td:last-child {
+        border-right: none;
+    }
+
+    .subs-table th {
+        color: #31455f;
+        background: #f9fbff;
+        font-size: 0.78rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .subs-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .subs-row.accepted-row {
+        background: rgba(232, 246, 226, 0.45);
+    }
+
+    .subs-row.wa-row {
+        background: rgba(252, 233, 231, 0.36);
+    }
+
+    .subs-btn {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: #ffffff;
+        color: var(--accent);
+        padding: 0.36rem 0.58rem;
+        font-size: 0.82rem;
+        font-weight: 650;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .subs-btn:hover {
+        background: var(--accent-soft);
+        border-color: #c7d8ec;
+    }
+
+    .verdict-pill {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.22rem 0.56rem;
+        border: 1px solid var(--border);
+        background: #f8fbff;
+        color: #52657d;
+        font-size: 0.8rem;
+        font-weight: 650;
+    }
+
+    .verdict-pill.accepted {
+        background: #e8f6e2;
+        border-color: #bcdcae;
+        color: #2e5c22;
+    }
+
+    .verdict-pill.wa {
+        background: #fce9e7;
+        border-color: #efc4bf;
+        color: #8a3026;
+    }
+
+    .empty-row td {
+        padding: 1rem;
+        color: var(--text-soft);
+    }
+
+    @media (max-width: 1100px) {
+        .subs-shell {
+            margin: 0 1rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .subs-shell {
+            margin: 0 0.75rem 1.5rem;
+        }
+    }
+</style>
+
+<section class="subs-shell">
+    <div class="subs-card">
+        <div class="subs-head">
+            <h1>{{.Username}}'s submissions</h1>
+            <p>Latest attempts by this user</p>
+        </div>
+        <div class="subs-table-wrap">
+            <table class="subs-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Who</th>
+                        <th>When</th>
+                        <th>Problem</th>
+                        <th>Language</th>
+                        <th>Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Items}}
+                    <tr class="subs-row {{if eq .Verdict .Accepted}}accepted-row{{else}}wa-row{{end}}">
+                        <td><button type="button" class="subs-btn" onclick="window.location.href='/submission?id={{.SubID}}'">{{.SubID}}</button></td>
+                        <td><button type="button" class="subs-btn" onclick="window.location.href='/profile?username={{.Username}}'">{{.Username}}</button></td>
+                        <td><code>{{.Submitted_at}}</code></td>
+                        <td><button type="button" class="subs-btn" onclick="window.location.href='/problem?id={{.ID}}'">{{.Title}}</button></td>
+                        <td>GNU G++14</td>
+                        <td><span class="verdict-pill {{if eq .Verdict .Accepted}}accepted{{else}}wa{{end}}">{{.Verdict}}</span></td>
+                    </tr>
+                    {{else}}
+                    <tr class="empty-row">
+                        <td colspan="6">No data found.</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{{end}}
